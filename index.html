@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <style>
+    html, body {
+      height: 100vh;
+      width: 100vw;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+
+<body>
+  <script async src="https://unpkg.com/es-module-shims@1.3.6/dist/es-module-shims.js"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.142.0/build/three.module.js",
+        "vrbutton": "https://unpkg.com/three@0.142.0/examples/jsm/webxr/VRButton.js"
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/mathjs@10.6.4/lib/browser/math.js"></script>
+  <script type="module" src="js/script.js"></script>
+</body>
+
+</html>
