@@ -18,8 +18,8 @@ class Joint {
 
   create_geometry(scene) {
     const material = new THREE.MeshStandardMaterial();
-    const sphere = new THREE.SphereGeometry(0.05, 16, 8);
-    const cylinder = new THREE.CylinderGeometry(0.04, 0.04, 1, 8, true);
+    const sphere = new THREE.SphereGeometry(0.03, 16, 8);
+    const cylinder = new THREE.CylinderGeometry(0.02, 0.02, 1, 8, true);
     cylinder.scale(1, this.length, 1);
     cylinder.translate(0, this.length / 2, 0);
 
@@ -29,7 +29,7 @@ class Joint {
     this.origin.add(this.cylinder);
     scene.add(this.origin);
   }
-  
+
   set_length(length) {
     this.cylinder?.geometry.scale(1, 1 / this.length, 1);
     this.cylinder?.geometry.scale(1, length, 1);

@@ -3,15 +3,14 @@ import { VRButton } from "vrbutton";
 import { Joint, forward_kinematics, inverse_kinematics } from "./kinematics.js";
 
 
-const JOINT_LEVEL = true; // true for joint amplification, false for endpoint
-const MAX_ITERATIONS = 5; // Max inverse kinematics iterations per frame
-
 let scene, renderer, camera;
 let controllers;
 let arm, amplified_arm;
 let shoulder = new THREE.Vector3();
 
 
+// true for joint amplification, false for endpoint
+const JOINT_LEVEL = window.confirm("Do you want joint-level amplification?");
 init();
 if (JOINT_LEVEL) {
   initIK();
@@ -45,6 +44,10 @@ function init() {
 
   scene.add(new THREE.GridHelper(2, 10));
 
+  let cube = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial());
+  cube.position.z = 2;
+  scene.add(cube);
+
   document.body.appendChild(VRButton.createButton(renderer));
 
   controllers = [0, 1].map(index => {
@@ -56,7 +59,7 @@ function init() {
     scene.add(grip);
 
     let object = new THREE.Mesh(
-      new THREE.BoxGeometry(0.1, 0.1, 0.1),
+      new THREE.BoxGeometry(0.07, 0.07, 0.07),
       new THREE.MeshStandardMaterial({ color: 0xff0000 })
     );
     scene.add(object);
@@ -77,19 +80,14 @@ function init() {
 function initIK() {
 
   arm = [
-    new Joint(new THREE.Vector3(1, 0, 0), 0), // Shoulder: 3DOF
-    new Joint(new THREE.Vector3(0, 1, 0), 0),
-    new Joint(new THREE.Vector3(0, 0, 1), 1),
-
-    new Joint(new THREE.Vector3(0, 0, 1), 1), // Elbow: 1DOF
+    new Joint(new THREE.Vector3(1, 0, 0), 1), // Shoulder
+    new Joint(new THREE.Vector3(1, 0, 0), 1), // Elbow
   ];
 
   // TODO: this is so unclean. is there a better way to clone an array with objects in it 
   amplified_arm = [
-    new Joint(new THREE.Vector3(1, 0, 0), 0),
-    new Joint(new THREE.Vector3(0, 1, 0), 0),
-    new Joint(new THREE.Vector3(0, 0, 1), 1),
-    new Joint(new THREE.Vector3(0, 0, 1), 1),
+    new Joint(new THREE.Vector3(1, 0, 0), 1),
+    new Joint(new THREE.Vector3(1, 0, 0), 1),
   ];
 
   arm.forEach(joint => joint.create_geometry(scene));
@@ -109,10 +107,10 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-function update_joint_level() {
+function update_joint_level(iterations = 1) {
   // TODO: this is a lot of cloning
   let endpoint = forward_kinematics(arm, shoulder.clone());
-  for (let i = 0; i < MAX_ITERATIONS && endpoint.distanceTo(controllers[0].grip.position) > 0.01; i++) {
+  for (let i = 0; i < iterations && endpoint.distanceTo(controllers[0].grip.position) > 0.001; i++) {
     let dth = inverse_kinematics(controllers[0].grip.position, endpoint, arm);
     dth.forEach((th, i) => {
       arm[i].angle += th;
@@ -143,17 +141,27 @@ function update_endpoint_level() {
 
 function onSqueezeStart(event, index) {
   if (JOINT_LEVEL) {
+    // TODO: based on camera orientation instead of hardcoded?
 
-    // Set a new shoulder position and arm lengths
+    // Set shoulder position:
+    //   Place controller in front of shoulder,
+    //   offset behind squeezed controller position
     shoulder.copy(controllers[index].grip.position);
-    let half_length = shoulder.distanceTo(controllers[1 - index].grip.position) / 2;
-    arm[2].set_length(half_length);
-    arm[3].set_length(half_length);
-    amplified_arm[2].set_length(half_length);
-    amplified_arm[3].set_length(half_length);
+    shoulder.z += 0.05
+
+    // Set arm segment lengths:
+    //   Arm should be in saggital plane,
+    //   upper arm is vertical, elbow should be bent 90 degrees
+    let upper_arm = Math.abs(shoulder.y - controllers[1 - index].grip.position.y);
+    arm[0].set_length(upper_arm);
+    amplified_arm[0].set_length(upper_arm);
+
+    let forearm = Math.abs(shoulder.z - controllers[1 - index].grip.position.z);
+    arm[1].set_length(forearm);
+    amplified_arm[1].set_length(forearm);
 
     // Reset the amplified angles to be equal to real angles
-    update_joint_level();
+    update_joint_level(10);
     amplified_arm.forEach((joint, i) => {
       joint.angle = arm[i].angle;
     });
