@@ -15,14 +15,14 @@ class Joint {
     this.angle = angle;
     this.origin = new THREE.Object3D();
   }
-  
+
   create_geometry(scene) {
     const material = new THREE.MeshStandardMaterial();
     const sphere = new THREE.SphereGeometry(0.05, 16, 8);
     const cylinder = new THREE.CylinderGeometry(0.04, 0.04, 1, 8, true);
     cylinder.scale(1, this.length, 1);
     cylinder.translate(0, this.length / 2, 0);
-    
+
     this.origin.add(new THREE.Mesh(sphere, material));
     this.origin.add(new THREE.Mesh(cylinder, material));
     scene.add(this.origin);
@@ -39,20 +39,20 @@ class Joint {
 */
 function forward_kinematics(arm, pos) {
   let ang = new THREE.Quaternion();
-  
+
   let rot = new THREE.Quaternion();
   let segment = new THREE.Vector3();
   arm.forEach(joint => {
     rot.setFromAxisAngle(joint.axis, joint.angle);
     ang.multiply(rot);
-    
+
     joint.origin.position.copy(pos);
     joint.origin.rotation.setFromQuaternion(ang);
-    
+
     segment.set(0, joint.length, 0);
     pos.add(segment.applyQuaternion(ang));
   })
-  
+
   return pos;
 }
 
@@ -69,26 +69,26 @@ function forward_kinematics(arm, pos) {
 // NOTE: this still relies on mathjs. would be nice to remove a dependency, but manual matrix inversion implementation... ugh
 function inverse_kinematics(target, endpoint, joints, damping = 0.2) {
 
-   let v = math.subtract(target.toArray(), endpoint.toArray());
- 
-   /* Iterating over each joint gives us [dx, dy, dz] in a row of the matrix
-      the Jacobian is the transpose of that */
-   let L = new THREE.Vector3();
-   let J_t = joints.map(joint => {
-     L.subVectors(target, joint.origin.position);
-     return joint.axis.clone().applyEuler(joint.origin.rotation).cross(L).toArray();
-   });
-   let J = math.transpose(J_t);
- 
-   let J_plus = math.multiply(
-     J_t,
-     math.inv(math.add(
-       math.multiply(J, J_t),
-       math.multiply(math.identity(v.length), damping**2)
-     ))
-   );
-   
-   return math.multiply(J_plus, v);
+  let v = math.subtract(target.toArray(), endpoint.toArray());
+
+  /* Iterating over each joint gives us [dx, dy, dz] in a row of the matrix
+     the Jacobian is the transpose of that */
+  let L = new THREE.Vector3();
+  let J_t = joints.map(joint => {
+    L.subVectors(target, joint.origin.position);
+    return joint.axis.clone().applyEuler(joint.origin.rotation).cross(L).toArray();
+  });
+  let J = math.transpose(J_t);
+
+  let J_plus = math.multiply(
+    J_t,
+    math.inv(math.add(
+      math.multiply(J, J_t),
+      math.multiply(math.identity(v.length), damping ** 2)
+    ))
+  );
+
+  return math.multiply(J_plus, v);
 
 }
 
