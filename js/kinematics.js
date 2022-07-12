@@ -23,9 +23,17 @@ class Joint {
     cylinder.scale(1, this.length, 1);
     cylinder.translate(0, this.length / 2, 0);
 
-    this.origin.add(new THREE.Mesh(sphere, material));
-    this.origin.add(new THREE.Mesh(cylinder, material));
+    this.sphere = new THREE.Mesh(sphere, material);
+    this.cylinder = new THREE.Mesh(cylinder, material);
+    this.origin.add(this.sphere);
+    this.origin.add(this.cylinder);
     scene.add(this.origin);
+  }
+  
+  set_length(length) {
+    this.cylinder?.geometry.scale(1, 1 / this.length, 1);
+    this.cylinder?.geometry.scale(1, length, 1);
+    this.length = length;
   }
 }
 

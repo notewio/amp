@@ -4,9 +4,12 @@ import { Joint, forward_kinematics, inverse_kinematics } from "./kinematics.js";
 
 
 const JOINT_LEVEL = true; // true for joint amplification, false for endpoint
+const MAX_ITERATIONS = 5; // Max inverse kinematics iterations per frame
+
 let scene, renderer, camera;
 let controllers;
 let arm, amplified_arm;
+let shoulder = new THREE.Vector3();
 
 
 init();
@@ -46,6 +49,7 @@ function init() {
 
   controllers = [0, 1].map(index => {
     let controller = renderer.xr.getController(index);
+    controller.addEventListener("squeezestart", e => onSqueezeStart(e, index));
     scene.add(controller);
 
     let grip = renderer.xr.getControllerGrip(index);
@@ -106,15 +110,18 @@ function animate() {
 }
 
 function update_joint_level() {
-  // TODO: shoulder position  
-  let endpoint = forward_kinematics(arm, new THREE.Vector3());
-  let dth = inverse_kinematics(controllers[0].grip.position, endpoint, arm);
-  dth.forEach((th, i) => {
-    arm[i].angle += th;
-    amplified_arm[i].angle += 2 * th;
-  });
+  // TODO: this is a lot of cloning
+  let endpoint = forward_kinematics(arm, shoulder.clone());
+  for (let i = 0; i < MAX_ITERATIONS && endpoint.distanceTo(controllers[0].grip.position) > 0.01; i++) {
+    let dth = inverse_kinematics(controllers[0].grip.position, endpoint, arm);
+    dth.forEach((th, i) => {
+      arm[i].angle += th;
+      amplified_arm[i].angle += 2 * th;
+    });
+    endpoint = forward_kinematics(arm, shoulder.clone());
+  }
 
-  let amplified = forward_kinematics(amplified_arm, new THREE.Vector3());
+  let amplified = forward_kinematics(amplified_arm, shoulder.clone());
   controllers[0].object.rotation.copy(controllers[1].grip.rotation);
   controllers[0].object.position.copy(amplified);
 
@@ -131,4 +138,30 @@ function update_endpoint_level() {
     c.object.position.multiplyScalar(2);
     c.object.position.add(c.rest_position);
   });
+}
+
+
+function onSqueezeStart(event, index) {
+  if (JOINT_LEVEL) {
+
+    // Set a new shoulder position and arm lengths
+    shoulder.copy(controllers[index].grip.position);
+    let half_length = shoulder.distanceTo(controllers[1 - index].grip.position) / 2;
+    arm[2].set_length(half_length);
+    arm[3].set_length(half_length);
+    amplified_arm[2].set_length(half_length);
+    amplified_arm[3].set_length(half_length);
+
+    // Reset the amplified angles to be equal to real angles
+    update_joint_level();
+    amplified_arm.forEach((joint, i) => {
+      joint.angle = arm[i].angle;
+    });
+
+  } else {
+
+    // Reset rest position
+    controllers.forEach(c => c.rest_position.copy(c.grip.position));
+
+  }
 }
