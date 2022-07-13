@@ -4,6 +4,11 @@ import { Joint, forward_kinematics, inverse_kinematics } from "./kinematics.js";
 import { TaskPath } from "./task.js";
 
 
+const HEIGHT = 1.8;
+const ARM_LENGTH = 0.353 * HEIGHT;
+const DOM_HAND = 0;
+
+
 let scene, renderer, camera;
 let controllers;
 let arm, amplified_arm;
@@ -114,14 +119,16 @@ function animate() {
     update_endpoint_level();
   }
 
+  path.intersect(controllers[DOM_HAND].object.position);
+
   renderer.render(scene, camera);
 }
 
 function update_joint_level(iterations = 1) {
   // TODO: this is a lot of cloning
   let endpoint = forward_kinematics(arm, shoulder.clone());
-  for (let i = 0; i < iterations && endpoint.distanceTo(controllers[0].grip.position) > 0.001; i++) {
-    let dth = inverse_kinematics(controllers[0].grip.position, endpoint, arm);
+  for (let i = 0; i < iterations && endpoint.distanceTo(controllers[DOM_HAND].grip.position) > 0.001; i++) {
+    let dth = inverse_kinematics(controllers[DOM_HAND].grip.position, endpoint, arm);
     dth.forEach((th, i) => {
       arm[i].angle += th;
       arm[i].angle = angle_modulo(arm[i].angle);
@@ -133,8 +140,8 @@ function update_joint_level(iterations = 1) {
   }
 
   let amplified = forward_kinematics(amplified_arm, shoulder.clone());
-  controllers[0].object.rotation.copy(controllers[1].grip.rotation);
-  controllers[0].object.position.copy(amplified);
+  controllers[DOM_HAND].object.rotation.copy(controllers[0].grip.rotation);
+  controllers[DOM_HAND].object.position.copy(amplified);
 
   controllers[1].object.rotation.copy(controllers[1].grip.rotation);
   controllers[1].object.position.copy(controllers[1].grip.position);
@@ -190,9 +197,9 @@ function onSqueezeStart(event, index) {
     controllers.forEach(c => c.rest_position.copy(c.grip.position));
 
     // Update path position
-    path.position.x = controllers[0].grip.position.x;
-    // TODO: how to get Y and Z position from this?
-    //       maybe eye level instead?
+    path.position.x = controllers[DOM_HAND].grip.position.x;
+    path.position.y = camera.position.y - ARM_LENGTH;
+    path.position.z = -ARM_LENGTH;
 
   }
 }

@@ -102,12 +102,15 @@ function inverse_kinematics(target, endpoint, joints, damping = 0.2) {
       math.identity(joints.length),
       math.multiply(J_plus, J)
     ),
-    joints.map(joint => joint.rest_angle - joint.angle)
+    joints.map(joint => {
+      let diff = Math.abs(joint.rest_angle - joint.angle);
+      return Math.min(Math.PI * 2 - diff, diff);
+    })
   );
 
   return math.add(
     math.multiply(J_plus, v),
-    cost
+    math.multiply(cost, damping),
   );
 
 }

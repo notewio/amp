@@ -25,6 +25,17 @@ class TaskPath extends THREE.Mesh {
       side: THREE.DoubleSide
     });
     super(geometry, material);
+
+    this.raycaster = new THREE.Raycaster();
+  }
+  intersect(position) {
+    this.raycaster.set(position, new THREE.Vector3(1, 1, 1));
+    const intersects = this.raycaster.intersectObject(this);
+    if (intersects.length % 2 === 1) {
+      this.material.color.setHex(0xaaffaa);
+    } else {
+      this.material.color.setHex(0xaaaaff);
+    }
   }
 }
 
