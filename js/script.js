@@ -1,12 +1,14 @@
 import * as THREE from "three";
 import { VRButton } from "vrbutton";
 import { Joint, forward_kinematics, inverse_kinematics } from "./kinematics.js";
+import { TaskPath } from "./task.js";
 
 
 let scene, renderer, camera;
 let controllers;
 let arm, amplified_arm;
 let shoulder = new THREE.Vector3();
+let path;
 
 
 // true for joint amplification, false for endpoint
@@ -22,6 +24,7 @@ if (JOINT_LEVEL) {
 */
 function init() {
 
+  // Scene, renderer, camera
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x888888);
 
@@ -36,18 +39,25 @@ function init() {
   camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
   scene.add(camera);
 
+  // Lighting
   const sun = new THREE.DirectionalLight(0xffffff, 0.5);
   sun.position.set(1, 1, 1).normalize();
   scene.add(sun);
 
   scene.add(new THREE.HemisphereLight(0x606060, 0x404040));
 
+  // Environment
   scene.add(new THREE.GridHelper(2, 10));
 
   let cube = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial());
-  cube.position.z = 2;
+  cube.position.z = -2;
   scene.add(cube);
 
+  path = new TaskPath();
+  path.position.set(0, 1.5, -1);
+  scene.add(path);
+
+  // VR, controllers
   document.body.appendChild(VRButton.createButton(renderer));
 
   controllers = [0, 1].map(index => {
@@ -166,10 +176,20 @@ function onSqueezeStart(event, index) {
       joint.angle = arm[i].angle;
     });
 
+    // Update path position
+    path.position.x = shoulder.x;
+    path.position.y = shoulder.y;
+    path.position.z = shoulder.z - (upper_arm + forearm) / 2;
+
   } else {
 
     // Reset rest position
     controllers.forEach(c => c.rest_position.copy(c.grip.position));
+
+    // Update path position
+    path.position.x = controllers[0].grip.position.x;
+    // TODO: how to get Y and Z position from this?
+    //       maybe eye level instead?
 
   }
 }
