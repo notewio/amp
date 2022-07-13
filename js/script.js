@@ -5,10 +5,11 @@ import { TaskPath } from "./task.js";
 import { GUI } from "lil-gui";
 
 
-let HEIGHT = 1.8;
-let ARM_LENGTH = 0.353 * HEIGHT;
+let HEIGHT = 0;
+let ARM_LENGTH = 0.5;
 let DOM_HAND = 0;
 let JOINT_LEVEL = true;
+let AMPLIFICATION = [2, 2, 2];
 
 let scene, renderer, camera;
 let controllers;
@@ -137,7 +138,7 @@ function update_joint_level(iterations = 1) {
       arm[i].angle += th;
       arm[i].angle = angle_modulo(arm[i].angle);
 
-      amplified_arm[i].angle += 2 * th;
+      amplified_arm[i].angle += AMPLIFICATION[i] * th;
       amplified_arm[i].angle = angle_modulo(amplified_arm[i].angle);
     });
     endpoint = forward_kinematics(arm, shoulder.clone());
@@ -157,7 +158,9 @@ function update_endpoint_level() {
 
     c.object.position.copy(c.grip.position);
     c.object.position.sub(c.rest_position);
-    c.object.position.multiplyScalar(2);
+    c.object.position.x *= AMPLIFICATION[0];
+    c.object.position.y *= AMPLIFICATION[1];
+    c.object.position.z *= AMPLIFICATION[2];
     c.object.position.add(c.rest_position);
   });
 }
@@ -176,11 +179,16 @@ function onSqueezeStart(event, index) {
     // Set arm segment lengths:
     //   Arm should be in saggital plane,
     //   upper arm is vertical, elbow should be bent 90 degrees
-    let upper_arm = Math.abs(shoulder.y - controllers[1 - index].grip.position.y);
+    let upper_arm, forearm;
+    if (HEIGHT > 0) {
+      upper_arm = 0.202 * HEIGHT;
+      forearm = 0.151 * HEIGHT;
+    } else {
+      upper_arm = Math.abs(shoulder.y - controllers[1 - index].grip.position.y);
+      forearm = Math.abs(shoulder.z - controllers[1 - index].grip.position.z);
+    }
     arm[0].set_length(upper_arm);
     amplified_arm[0].set_length(upper_arm);
-
-    let forearm = Math.abs(shoulder.z - controllers[1 - index].grip.position.z);
     arm[1].set_length(forearm);
     amplified_arm[1].set_length(forearm);
 
@@ -217,9 +225,11 @@ function onSelectEnd(event, index) { logging_started = false }
 function initGUI() {
   const gui = new GUI();
   const init_options = {
+    ratios: false,
     height: 1.8,
-    hand: "dominant",
-    amplification: "joint",
+    hand: "left",
+    amplification: "joint level",
+    amount: "2 2 2",
     start: () => {
       init();
       if (JOINT_LEVEL) {
@@ -229,15 +239,21 @@ function initGUI() {
     },
   };
   const options = gui.addFolder("Init options");
+  options.add(init_options, "ratios")
+    .name("Use anatomic ratios")
+    .onChange(v => { HEIGHT = v ? init_options.height : 0 });
   options.add(init_options, "height")
     .name("Height (meters)")
     .onChange(v => { HEIGHT = v; ARM_LENGTH = 0.353 * HEIGHT; });
-  options.add(init_options, "hand", ["dominant", "other"])
+  options.add(init_options, "hand", ["left", "right"])
     .name("Hand")
-    .onChange(v => DOM_HAND = v === "dominant" ? 0 : 1);
+    .onChange(v => DOM_HAND = v === "left" ? 0 : 1);
   options.add(init_options, "amplification", ["joint level", "endpoint level"])
     .name("Amplify on")
     .onChange(v => JOINT_LEVEL = v === "joint level");
+  options.add(init_options, "amount")
+    .name("Amp amount")
+    .onChange(v => AMPLIFICATION = v.split(" ").map(x => parseFloat(x)));
   options.add(init_options, "start")
     .name("Initialize");
 
