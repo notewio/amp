@@ -13,11 +13,17 @@ class Curve extends THREE.Curve {
       0,
     ).multiplyScalar(this.scale);
   }
+  /* pos is an array of x, y, z values, translated to be in the curve's space */
+  distance_to(pos) {
+    // TODO: actually do real math here for the more complex curves
+    return Math.sqrt(pos[0] ** 2 + pos[2] ** 2);
+  }
 }
 
 class TaskPath extends THREE.Mesh {
   constructor(scale = 1) {
-    const geometry = new THREE.TubeGeometry(new Curve(scale), 30, 0.05, 8, false);
+    const curve = new Curve(scale);
+    const geometry = new THREE.TubeGeometry(curve, 30, 0.05, 8, false);
     const material = new THREE.MeshToonMaterial({
       color: 0xaaaaff,
       transparent: true,
@@ -26,6 +32,7 @@ class TaskPath extends THREE.Mesh {
     });
     super(geometry, material);
 
+    this.curve = curve;
     this.raycaster = new THREE.Raycaster();
   }
   intersect(position) {

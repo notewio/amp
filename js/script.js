@@ -2,26 +2,24 @@ import * as THREE from "three";
 import { VRButton } from "vrbutton";
 import { Joint, forward_kinematics, inverse_kinematics } from "./kinematics.js";
 import { TaskPath } from "./task.js";
+import { GUI } from "lil-gui";
 
 
-const HEIGHT = 1.8;
-const ARM_LENGTH = 0.353 * HEIGHT;
-const DOM_HAND = 0;
-
+let HEIGHT = 1.8;
+let ARM_LENGTH = 0.353 * HEIGHT;
+let DOM_HAND = 0;
+let JOINT_LEVEL = true;
 
 let scene, renderer, camera;
 let controllers;
 let arm, amplified_arm;
 let shoulder = new THREE.Vector3();
 let path;
+let logging_started = false;
+let position_data = [];
 
 
-// true for joint amplification, false for endpoint
-const JOINT_LEVEL = window.confirm("Do you want joint-level amplification?");
-init();
-if (JOINT_LEVEL) {
-  initIK();
-}
+initGUI();
 
 
 /*
@@ -68,6 +66,8 @@ function init() {
   controllers = [0, 1].map(index => {
     let controller = renderer.xr.getController(index);
     controller.addEventListener("squeezestart", e => onSqueezeStart(e, index));
+    controller.addEventListener("selectstart", e => onSelectStart(e, index));
+    controller.addEventListener("selectend", e => onSelectEnd(e, index));
     scene.add(controller);
 
     let grip = renderer.xr.getControllerGrip(index);
@@ -121,6 +121,10 @@ function animate() {
 
   path.intersect(controllers[DOM_HAND].object.position);
 
+  if (logging_started) {
+    position_data.push([performance.now(), ...controllers[DOM_HAND].object.position.toArray()]);
+  }
+
   renderer.render(scene, camera);
 }
 
@@ -140,11 +144,11 @@ function update_joint_level(iterations = 1) {
   }
 
   let amplified = forward_kinematics(amplified_arm, shoulder.clone());
-  controllers[DOM_HAND].object.rotation.copy(controllers[0].grip.rotation);
+  controllers[DOM_HAND].object.rotation.copy(controllers[DOM_HAND].grip.rotation);
   controllers[DOM_HAND].object.position.copy(amplified);
 
-  controllers[1].object.rotation.copy(controllers[1].grip.rotation);
-  controllers[1].object.position.copy(controllers[1].grip.position);
+  controllers[1 - DOM_HAND].object.rotation.copy(controllers[1 - DOM_HAND].grip.rotation);
+  controllers[1 - DOM_HAND].object.position.copy(controllers[1 - DOM_HAND].grip.position);
 }
 
 function update_endpoint_level() {
@@ -167,7 +171,7 @@ function onSqueezeStart(event, index) {
     //   Place controller in front of shoulder,
     //   offset behind squeezed controller position
     shoulder.copy(controllers[index].grip.position);
-    shoulder.z += 0.05
+    shoulder.z += 0.05;
 
     // Set arm segment lengths:
     //   Arm should be in saggital plane,
@@ -202,6 +206,59 @@ function onSqueezeStart(event, index) {
     path.position.z = -ARM_LENGTH;
 
   }
+}
+function onSelectStart(event, index) { logging_started = index === DOM_HAND }
+function onSelectEnd(event, index) { logging_started = false }
+
+
+/*
+  Initialize controls display
+*/
+function initGUI() {
+  const gui = new GUI();
+  const init_options = {
+    height: 1.8,
+    hand: "dominant",
+    amplification: "joint",
+    start: () => {
+      init();
+      if (JOINT_LEVEL) {
+        initIK();
+      }
+      options.destroy();
+    },
+  };
+  const options = gui.addFolder("Init options");
+  options.add(init_options, "height")
+    .name("Height (meters)")
+    .onChange(v => { HEIGHT = v; ARM_LENGTH = 0.353 * HEIGHT; });
+  options.add(init_options, "hand", ["dominant", "other"])
+    .name("Hand")
+    .onChange(v => DOM_HAND = v === "dominant" ? 0 : 1);
+  options.add(init_options, "amplification", ["joint level", "endpoint level"])
+    .name("Amplify on")
+    .onChange(v => JOINT_LEVEL = v === "joint level");
+  options.add(init_options, "start")
+    .name("Initialize");
+
+  const action_options = {
+    positions: () => {
+      let csvContent = "data:text/csv;charset=utf-8," + position_data.map(p => p.join(",")).join("\n");
+      let encodedUri = encodeURI(csvContent);
+      window.open(encodedUri);
+    },
+    distances: () => {
+      let csvContent = "data:text/csv;charset=utf-8," + position_data.map(p => {
+        let dist = path.curve.distance_to(math.subtract(p.slice(1, 4), path.position.toArray()));
+        return [p[0], dist].join(",");
+      }).join("\n");
+      let encodedUri = encodeURI(csvContent);
+      window.open(encodedUri);
+    }
+  };
+  const actions = gui.addFolder("Live actions");
+  actions.add(action_options, "positions").name("Download position data");
+  actions.add(action_options, "distances").name("Download error (distance) data");
 }
 
 
