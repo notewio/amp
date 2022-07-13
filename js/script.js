@@ -90,14 +90,14 @@ function init() {
 function initIK() {
 
   arm = [
-    new Joint(new THREE.Vector3(1, 0, 0), 1), // Shoulder
-    new Joint(new THREE.Vector3(1, 0, 0), 1), // Elbow
+    new Joint(new THREE.Vector3(1, 0, 0), 1, 0, 3 * Math.PI / 2), // Shoulder
+    new Joint(new THREE.Vector3(1, 0, 0), 1, 0, Math.PI / 2), // Elbow
   ];
 
   // TODO: this is so unclean. is there a better way to clone an array with objects in it 
   amplified_arm = [
-    new Joint(new THREE.Vector3(1, 0, 0), 1),
-    new Joint(new THREE.Vector3(1, 0, 0), 1),
+    new Joint(new THREE.Vector3(1, 0, 0), 1, 0, 3 * Math.PI / 2), // Shoulder
+    new Joint(new THREE.Vector3(1, 0, 0), 1, 0, Math.PI / 2), // Elbow
   ];
 
   arm.forEach(joint => joint.create_geometry(scene));
@@ -124,7 +124,10 @@ function update_joint_level(iterations = 1) {
     let dth = inverse_kinematics(controllers[0].grip.position, endpoint, arm);
     dth.forEach((th, i) => {
       arm[i].angle += th;
+      arm[i].angle = angle_modulo(arm[i].angle);
+
       amplified_arm[i].angle += 2 * th;
+      amplified_arm[i].angle = angle_modulo(amplified_arm[i].angle);
     });
     endpoint = forward_kinematics(arm, shoulder.clone());
   }
@@ -192,4 +195,13 @@ function onSqueezeStart(event, index) {
     //       maybe eye level instead?
 
   }
+}
+
+
+/*
+  Utility
+*/
+const TWOPI = Math.PI * 2;
+function angle_modulo(th) {
+  return ((th % TWOPI) + TWOPI) % TWOPI;
 }

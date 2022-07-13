@@ -9,10 +9,11 @@ import * as THREE from "three";
     origin: Object3D   Position and orientation of joint in world space
 */
 class Joint {
-  constructor(axis, length = 0, angle = 0) {
+  constructor(axis, length = 0, angle = 0, rest_angle = 0) {
     this.axis = axis;
     this.length = length;
     this.angle = angle;
+    this.rest_angle = rest_angle;
     this.origin = new THREE.Object3D();
   }
 
@@ -96,7 +97,18 @@ function inverse_kinematics(target, endpoint, joints, damping = 0.2) {
     ))
   );
 
-  return math.multiply(J_plus, v);
+  let cost = math.multiply(
+    math.subtract(
+      math.identity(joints.length),
+      math.multiply(J_plus, J)
+    ),
+    joints.map(joint => joint.rest_angle - joint.angle)
+  );
+
+  return math.add(
+    math.multiply(J_plus, v),
+    cost
+  );
 
 }
 
