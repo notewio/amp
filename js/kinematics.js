@@ -1,6 +1,9 @@
 import * as THREE from "three";
 
 
+const TAU = Math.PI * 2;
+
+
 /*
   Represents a joint in the arm.
     axis: Vector3      Axis of rotation
@@ -36,17 +39,28 @@ class Joint {
     this.cylinder?.geometry.scale(1, length, 1);
     this.length = length;
   }
+
+  set_angle(angle) {
+    this.angle = angle;
+    this.angle = ((this.angle % TAU) + TAU) % TAU;
+  }
+
+  clone() {
+    return new Joint(this.axis.clone(), this.length, this.angle, this.rest_angle);
+  }
 }
 
 
 /*
   Calculate forward kinematics for an array of Joints
     arm: mutable Array<Joint>  The joints to do kinematics on
-    pos: mutable Vector3       Base position for the arm (shoulder)
+    base: Vector3              Base position for the arm (shoulder)
+    pos: mutable Vector3       Where to save the endpoint position to
     
     Returns end effector position.
 */
-function forward_kinematics(arm, pos) {
+function forward_kinematics(arm, base, pos = new THREE.Vector3()) {
+  pos.copy(base);
   let ang = new THREE.Quaternion();
 
   let rot = new THREE.Quaternion();
