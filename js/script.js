@@ -1,4 +1,5 @@
 import { EndpointApp } from "./endpoint-level.js";
+import { DefaultApp } from "./no-level.js";
 import { JointApp } from "./joint-level.js";
 import { GUI } from "lil-gui";
 
@@ -17,7 +18,7 @@ const init = {
   start: () => start(),
 };
 
-init_gui.add(init, "level", ["joint", "endpoint"])
+init_gui.add(init, "level", ["joint", "endpoint", "none"])
   .name("Amp level");
 
 init_gui.add(init, "amplification")
@@ -41,8 +42,10 @@ function start() {
   init.amplification = init.amplification.split(" ").map(x => parseFloat(x));
   if (init.level === "joint") {
     app = new JointApp(init);
-  } else {
+  } else if (init.level === "endpoint") {
     app = new EndpointApp(init);
+  } else {
+    app = new DefaultApp(init);
   }
 
 

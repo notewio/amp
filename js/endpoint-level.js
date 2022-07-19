@@ -30,13 +30,8 @@ class EndpointApp extends App {
   }
 
   reset() {
-
     this.controllers.forEach((c, i) => this.rest_position[i].copy(c.grip.position));
-
-    this.path.position.copy(this.controllers[this.hand].grip.position);
-    this.path.position.y += this.approx_arm_length / 2; // TODO: do a real shoulder estimation
-    this.path.position.z -= this.approx_arm_length * 0.5;
-
+    super.reset();
   }
 
 }
