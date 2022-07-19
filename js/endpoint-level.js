@@ -3,11 +3,11 @@ import { App } from "./core.js";
 
 class EndpointApp extends App {
 
-  constructor(amplification) {
+  constructor(settings) {
 
-    super();
+    super(settings);
 
-    this.amplification = new THREE.Vector3().fromArray(amplification);
+    this.amplification = new THREE.Vector3().fromArray(settings.amplification);
     this.rest_position = [
       new THREE.Vector3(0, 0, 0),
       new THREE.Vector3(0, 0, 0),
@@ -30,7 +30,13 @@ class EndpointApp extends App {
   }
 
   reset() {
+
     this.controllers.forEach((c, i) => this.rest_position[i].copy(c.grip.position));
+
+    this.path.position.copy(this.controllers[this.hand].grip.position);
+    this.path.position.y += this.approx_arm_length / 2; // TODO: do a real shoulder estimation
+    this.path.position.z -= this.approx_arm_length * 0.5;
+
   }
 
 }

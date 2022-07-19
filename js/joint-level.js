@@ -4,13 +4,12 @@ import { Joint, forward_kinematics, inverse_kinematics } from "./kinematics.js";
 
 class JointApp extends App {
 
-  constructor(hand, amplification) {
+  constructor(settings) {
 
-    super();
+    super(settings);
 
     this.initIK();
-    this.hand = hand;
-    this.amplification = amplification;
+    this.amplification = settings.amplification;
 
   }
 
@@ -83,6 +82,10 @@ class JointApp extends App {
     // Reset the amplified angles to be equal to real angles
     this.kinematics(10);
     this.amplified_arm.forEach((joint, i) => joint.angle = this.arm[i].angle);
+
+    // Set path position
+    this.path.position.copy(this.shoulder);
+    this.path.position.z -= this.approx_arm_length * 0.5;
 
   }
 

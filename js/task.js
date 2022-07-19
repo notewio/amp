@@ -1,49 +1,81 @@
 import * as THREE from "three";
 
 
-class Curve extends THREE.Curve {
-  constructor(scale = 1) {
-    super();
-    this.scale = scale;
-  }
-  getPoint(t, optionalTarget = new THREE.Vector3()) {
-    return optionalTarget.set(
-      0,
-      t,
-      0,
-    ).multiplyScalar(this.scale);
-  }
-  /* pos is an array of x, y, z values, translated to be in the curve's space */
-  distance_to(pos) {
-    // TODO: actually do real math here for the more complex curves
-    return Math.sqrt(pos[0] ** 2 + pos[2] ** 2);
-  }
-}
+class Path extends THREE.Mesh {
+  constructor(type = "line", scale = 0.8) {
 
-class TaskPath extends THREE.Mesh {
-  constructor(scale = 1) {
-    const curve = new Curve(scale);
-    const geometry = new THREE.TubeGeometry(curve, 30, 0.05, 8, false);
+    let curve;
+    switch (type) {
+      case "circle":
+        curve = new Circle(scale);
+        break;
+      case "line":
+      default:
+        curve = new Line(scale);
+        break;
+    }
+
+    const geometry = new THREE.TubeGeometry(curve, 30, 0.05, 16, true);
     const material = new THREE.MeshToonMaterial({
-      color: 0xaaaaff,
+      color: 0xaaaaaa,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.3,
       side: THREE.DoubleSide
     });
     super(geometry, material);
 
     this.curve = curve;
     this.raycaster = new THREE.Raycaster();
+
   }
-  intersect(position) {
-    this.raycaster.set(position, new THREE.Vector3(1, 1, 1));
+
+  intersect(point) {
+    this.raycaster.set(point, new THREE.Vector3(1, 0, 0));
     const intersects = this.raycaster.intersectObject(this);
-    if (intersects.length % 2 === 1) {
-      this.material.color.setHex(0xaaffaa);
+    if (intersects.length / 2 % 2 === 1) {
+      this.material.color.setHex(0x88ff88);
     } else {
-      this.material.color.setHex(0xaaaaff);
+      this.material.color.setHex(0xaaaaaa);
     }
+  }
+
+  // NOTE: currently implementing distanceTo as only a 2D thing, within the sagittal plane
+  // do we need full 3D here?
+  distanceTo(point) {
+    let translated = new THREE.Vector3().subVectors(point, this.position);
+    return this.curve.distanceTo(translated);
   }
 }
 
-export { TaskPath }
+class Line extends THREE.Curve {
+  constructor(scale) {
+    super();
+    this.scale = scale;
+  }
+  getPoint(t, optionalTarget = new THREE.Vector3()) {
+    return optionalTarget.set(0, (t - 0.5) * this.scale, 0);
+  }
+  distanceTo(point) {
+    return Math.abs(point.z);
+  }
+}
+
+class Circle extends THREE.Curve {
+  constructor(scale) {
+    super();
+    this.scale = scale;
+  }
+  getPoint(t, optionalTarget = new THREE.Vector3()) {
+    return optionalTarget.set(
+      0,
+      Math.sin(t * 2 * Math.PI),
+      Math.cos(t * 2 * Math.PI),
+    ).multiplyScalar(this.scale / 2);
+  }
+  distanceTo(point) {
+    return Math.abs(Math.sqrt(point.y ** 2 + point.z ** 2) - this.scale / 2);
+  }
+}
+
+
+export { Path }

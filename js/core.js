@@ -1,12 +1,19 @@
 import * as THREE from "three";
 import { VRButton } from "vrbutton";
+import { Path } from "./task.js";
 
 
 class App {
 
-  constructor() {
+  constructor(settings) {
+
+    this.hand = settings.hand;
+    this.approx_arm_length = settings.height * 0.461;
+
     this.initThree();
     this.initVR();
+    this.initTask(settings.task_type);
+
   }
 
   initThree() {
@@ -72,7 +79,14 @@ class App {
 
   }
 
+  initTask(type) {
+    this.path = new Path(type);
+    this.scene.add(this.path);
+  }
+
   render() {
+    this.path.intersect(this.controllers[this.hand].object.position);
+
     this.renderer.render(this.scene, this.camera);
   }
 
