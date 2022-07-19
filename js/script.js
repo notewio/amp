@@ -11,9 +11,9 @@ let app;
 const init_gui = gui.addFolder("Init options");
 const init = {
   level: "joint",
+  trials: 10,
   amplification: "2 2 2",
   hand: 0,
-  task_type: "line",
   height: 1.8,
   start: () => start(),
 };
@@ -21,14 +21,14 @@ const init = {
 init_gui.add(init, "level", ["joint", "endpoint", "none"])
   .name("Amp level");
 
+init_gui.add(init, "trials")
+  .name("Trials per shape");
+
 init_gui.add(init, "amplification")
   .name("Amp amount");
 
 init_gui.add(init, "hand", { Left: 0, Right: 1 })
   .name("Dominant hand");
-
-init_gui.add(init, "task_type", ["line", "circle"])
-  .name("Task shape");
 
 init_gui.add(init, "height")
   .name("Height (m)");

@@ -42,7 +42,7 @@ class Path extends THREE.Mesh {
   // NOTE: currently implementing distanceTo as only a 2D thing, within the sagittal plane
   // do we need full 3D here?
   distanceTo(point) {
-    let translated = new THREE.Vector3().subVectors(point, this.position);
+    let translated = new THREE.Vector3().subVectors(point, this.position).applyEuler(this.rotation);
     return this.curve.distanceTo(translated);
   }
 }

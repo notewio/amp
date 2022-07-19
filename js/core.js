@@ -13,12 +13,13 @@ class App {
   constructor(settings) {
 
     this.hand = settings.hand;
+    this.trials = settings.trials;
     this.approx_arm_length = settings.height * 0.461;
     this.settings = settings;
 
     this.initThree();
     this.initVR();
-    this.initTask(settings.task_type);
+    this.initTask();
 
   }
 
@@ -64,9 +65,6 @@ class App {
 
     this.controllers = [0, 1].map(index => {
       let controller = this.renderer.xr.getController(index);
-      controller.addEventListener("selectstart", e => {
-        this.log_data.push([]); // TODO: how to actually tell when a trial starts/ends?
-      });
       this.scene.add(controller);
 
       let grip = this.renderer.xr.getControllerGrip(index);
@@ -84,22 +82,41 @@ class App {
         object: object,
       }
     });
+    this.dom_hand().controller.addEventListener("selectstart", this.onSelectStart.bind(this));
 
   }
 
-  initTask(type) {
+  initTask() {
 
-    this.path = new Path(type);
-    this.scene.add(this.path);
+    this.paths = [
+      new Path("line"),
+      new Path("line"),
+      new Path("circle"),
+    ];
+    this.paths[1].rotation.x = Math.PI / 2;
+    this.paths.forEach(p => {
+      this.scene.add(p);
+      p.visible = false;
+    });
+    this.paths[0].visible = true;
 
     this.log_data = [];
     this.log();
 
   }
 
+  onSelectStart(event) {
+
+    this.log_data.push([]);
+
+    this.paths.forEach(p => p.visible = false);
+    this.currentPath().visible = true;
+
+  }
+
 
   render() {
-    this.path.intersect(this.controllers[this.hand].object.position);
+    this.currentPath().intersect(this.dom_hand().object.position);
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -107,7 +124,8 @@ class App {
     let now = performance.now();
     this.log_data.at(-1)?.push([
       now,
-      ...this.controllers[this.hand].object.position.toArray(),
+      ...this.dom_hand().object.position.toArray(),
+      this.currentPath().distanceTo(this.dom_hand().object.position),
     ]);
     // NOTE: does this even need to be perfectly synchronous? how much data do we need?
     setTimeout(this.log.bind(this), 16);
@@ -115,9 +133,10 @@ class App {
 
 
   reset() {
-    this.path.position.copy(this.controllers[this.hand].grip.position);
-    this.path.position.y += this.approx_arm_length / 2; // TODO: do a real shoulder estimation
-    this.path.position.z -= this.approx_arm_length * 0.5;
+    this.paths.forEach(path => {
+      path.position.copy(this.dom_hand().grip.position);
+      path.position.y += this.approx_arm_length / 2; // TODO: do a real shoulder estimation
+    });
   }
 
   export() {
@@ -126,21 +145,18 @@ class App {
 
 Amplification level,${this.settings.level}
 Amplification amount,${this.settings.amplification}
-Path type,${this.settings.task_type}
-Path position,${this.path.position.toArray().map(x => round(x)).join(",")}
+Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
 
 `;
 
     content += this.log_data.map((_, i) => `Trial ${i} Time (ms),x,y,z,err`).join(",");
-    let p = new THREE.Vector3();
     for (let i = 0; i < Math.max(...this.log_data.map(x => x.length)); i++) {
       content += "\n";
       this.log_data.forEach(trial => {
         if (i < trial.length) {
           content += trial[i].map(x => round(x)).join(",") + ",";
-          content += round(this.path.distanceTo(p.fromArray(trial[i], 1))) + ",";
         } else {
-          content += ",".repeat(trial[0].length + 1);
+          content += ",".repeat(trial[0].length);
         }
       });
     }
@@ -152,6 +168,14 @@ Path position,${this.path.position.toArray().map(x => round(x)).join(",")}
     link.setAttribute('download', "export.csv");
     link.click();
 
+  }
+
+
+  currentPath() {
+    return this.paths.at(Math.floor((this.log_data.length - 1) / this.trials)) ?? this.paths.at(-1);
+  }
+  dom_hand() {
+    return this.controllers[this.hand];
   }
 
 }

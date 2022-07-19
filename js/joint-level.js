@@ -84,8 +84,10 @@ class JointApp extends App {
     this.amplified_arm.forEach((joint, i) => joint.angle = this.arm[i].angle);
 
     // Set path position
-    this.path.position.copy(this.shoulder);
-    this.path.position.z -= this.approx_arm_length * 0.5;
+    this.paths.forEach(path => {
+      path.position.copy(this.shoulder);
+      path.position.z -= this.approx_arm_length * 0.5;
+    });
 
   }
 
