@@ -58,4 +58,7 @@ function start() {
   live_gui.add(app, "reset")
     .name("Reset position");
 
+  live_gui.add(app, "export")
+    .name("Export position log");
+
 }

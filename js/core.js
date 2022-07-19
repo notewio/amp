@@ -3,12 +3,18 @@ import { VRButton } from "vrbutton";
 import { Path } from "./task.js";
 
 
+function round(x, n = 4) {
+  return Math.round(x * 10 ** n) / 10 ** n;
+}
+
+
 class App {
 
   constructor(settings) {
 
     this.hand = settings.hand;
     this.approx_arm_length = settings.height * 0.461;
+    this.settings = settings;
 
     this.initThree();
     this.initVR();
@@ -58,7 +64,9 @@ class App {
 
     this.controllers = [0, 1].map(index => {
       let controller = this.renderer.xr.getController(index);
-      // TODO: controller.addEventListener("squeezestart", e => onSqueezeStart(e, index));
+      controller.addEventListener("selectstart", e => {
+        this.log_data.push([]); // TODO: how to actually tell when a trial starts/ends?
+      });
       this.scene.add(controller);
 
       let grip = this.renderer.xr.getControllerGrip(index);
@@ -80,17 +88,68 @@ class App {
   }
 
   initTask(type) {
+
     this.path = new Path(type);
     this.scene.add(this.path);
+
+    this.log_data = [];
+    this.log();
+
   }
+
 
   render() {
     this.path.intersect(this.controllers[this.hand].object.position);
-
     this.renderer.render(this.scene, this.camera);
   }
 
+  log() {
+    let now = performance.now();
+    this.log_data.at(-1)?.push([
+      now,
+      ...this.controllers[this.hand].object.position.toArray(),
+    ]);
+    // NOTE: does this even need to be perfectly synchronous? how much data do we need?
+    setTimeout(this.log.bind(this), 16);
+  }
+
+
   reset() { }
+
+
+  export() {
+
+    let content = `Exported at ${new Date().toISOString()}
+
+Amplification level,${this.settings.level}
+Amplification amount,${this.settings.amplification}
+Path type,${this.settings.task_type}
+Path position,${this.path.position.toArray().map(x => round(x)).join(",")}
+
+`;
+
+    content += this.log_data.map((_, i) => `Trial ${i} Time (ms),x,y,z,err`).join(",");
+    let p = new THREE.Vector3();
+    for (let i = 0; i < Math.max(...this.log_data.map(x => x.length)); i++) {
+      content += "\n";
+      this.log_data.forEach(trial => {
+        if (i < trial.length) {
+          content += trial[i].map(x => round(x)).join(",") + ",";
+          content += round(this.path.distanceTo(p.fromArray(trial[i], 1))) + ",";
+        } else {
+          content += ",".repeat(trial[0].length + 1);
+        }
+      });
+    }
+
+    let blob = new Blob([content], { type: "text/csv;charset=utf-8;" });
+    let url = URL.createObjectURL(blob);
+    let link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', "export.csv");
+    link.click();
+
+  }
 
 }
 
