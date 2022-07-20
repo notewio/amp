@@ -135,6 +135,7 @@ class App {
       let now = performance.now();
       this.log_data.at(-1)?.push([
         now,
+        ...this.dom_hand().grip.position.toArray(),
         ...this.dom_hand().object.position.toArray(),
         this.current_path().distanceTo(this.dom_hand().object.position),
       ]);
@@ -161,14 +162,17 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
 
 `;
 
-    content += this.log_data.map((_, i) => `Trial ${i} Time (ms),x,y,z,err`).join(",");
+    content += this.log_data.map((_, i) => `Trial ${i} Time (ms),rx,ry,rz,ax,ay,az,err`).join(",");
     for (let i = 0; i < Math.max(...this.log_data.map(x => x.length)); i++) {
       content += "\n";
       this.log_data.forEach(trial => {
-        if (i < trial.length) {
-          content += trial[i].map(x => round(x)).join(",") + ",";
-        } else {
-          content += ",".repeat(trial[0].length);
+        // NOTE: in theory the only time a trial has no data is the very last one, so we don't have to worry about adding commas there.
+        if (trial.length > 0) {
+          if (i < trial.length) {
+            content += trial[i].map(x => round(x)).join(",") + ",";
+          } else {
+            content += ",".repeat(trial[0].length);
+          }
         }
       });
     }
