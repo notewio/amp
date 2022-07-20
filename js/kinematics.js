@@ -12,11 +12,12 @@ const TAU = Math.PI * 2;
     origin: Object3D   Position and orientation of joint in world space
 */
 class Joint {
-  constructor(axis, length = 0, angle = 0, rest_angle = 0) {
+  constructor(axis, length = 0, angle = 0, rest_angle = 0, range = TAU) {
     this.axis = axis;
     this.length = length;
     this.angle = angle;
     this.rest_angle = rest_angle;
+    this.range = range;
     this.origin = new THREE.Object3D();
   }
 
@@ -118,13 +119,13 @@ function inverse_kinematics(target, endpoint, joints, damping = 0.2) {
     ),
     joints.map(joint => {
       let diff = Math.abs(joint.rest_angle - joint.angle);
-      return Math.min(Math.PI * 2 - diff, diff);
-    })
+      return Math.min(Math.min(TAU - diff, diff) / joint.range * 2, 1) ** 2 * 2;
+    }),
   );
 
   return math.add(
     math.multiply(J_plus, v),
-    math.multiply(cost, damping),
+    cost,
   );
 
 }

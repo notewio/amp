@@ -16,8 +16,8 @@ class JointApp extends App {
   initIK() {
 
     this.arm = [
-      new Joint(new THREE.Vector3(1, 0, 0), 1, 0, 3 * Math.PI / 2), // Shoulder
-      new Joint(new THREE.Vector3(1, 0, 0), 1, 0, Math.PI / 2), // Elbow
+      new Joint(new THREE.Vector3(1, 0, 0), 1, 0, Math.PI), // Shoulder
+      new Joint(new THREE.Vector3(1, 0, 0), 1, 0, Math.PI / 2, Math.PI), // Elbow
     ];
     this.amplified_arm = this.arm.map(x => x.clone());
 
@@ -90,7 +90,8 @@ class JointApp extends App {
     this.amplified_arm.at(-1).set_length(forearm);
 
     // Reset the amplified angles to be equal to real angles
-    this.kinematics(10);
+    this.arm.forEach(joint => joint.angle = joint.rest_angle);
+    this.kinematics();
     this.amplified_arm.forEach((joint, i) => joint.angle = this.arm[i].angle);
 
     // Set path position
