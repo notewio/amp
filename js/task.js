@@ -2,7 +2,7 @@ import * as THREE from "three";
 
 
 class Path extends THREE.Mesh {
-  constructor(type = "line", scale = 0.8) {
+  constructor(type = "line", scale = 0.4) {
 
     let curve;
     switch (type) {

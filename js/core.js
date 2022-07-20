@@ -65,6 +65,7 @@ class App {
 
     this.controllers = [0, 1].map(index => {
       let controller = this.renderer.xr.getController(index);
+      controller.addEventListener("squeezestart", this.reset.bind(this));
       this.scene.add(controller);
 
       let grip = this.renderer.xr.getControllerGrip(index);
