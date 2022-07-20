@@ -23,8 +23,18 @@ class JointApp extends App {
 
     this.arm.forEach(joint => joint.create_geometry(this.scene));
 
-    this.shoulder = new THREE.Vector3(0, 0, 0);
+    this.shoulder = new THREE.Vector3(0, 1.5, 0);
 
+  }
+
+  onSelectStart(event) {
+    if (this.log_data.length === 0) {
+      this.arm.forEach(joint => {
+        joint.sphere.visible = false;
+        joint.cylinder.visible = false;
+      });
+    }
+    super.onSelectStart(event);
   }
 
   render() {

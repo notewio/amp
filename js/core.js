@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { VRButton } from "vrbutton";
-import { Path } from "./task.js";
+import { LinePath } from "./task.js";
 
 
 function round(x, n = 4) {
@@ -90,44 +90,55 @@ class App {
   initTask() {
 
     this.paths = [
-      new Path("line"),
-      new Path("line"),
-      new Path("circle"),
+      new LinePath(),
+      new LinePath(),
     ];
     this.paths[1].rotation.x = Math.PI / 2;
     this.paths.forEach(p => {
       this.scene.add(p);
       p.visible = false;
     });
-    this.paths[0].visible = true;
 
     this.log_data = [];
+    this.logging = false;
     this.log();
 
   }
 
+  // Starts the experiment.
   onSelectStart(event) {
-
-    this.log_data.push([]);
-
-    this.paths.forEach(p => p.visible = false);
-    this.currentPath().visible = true;
-
+    if (this.log_data.length === 0) {
+      this.log_data.push([]);
+      this.paths.forEach(p => p.visible = false);
+      this.current_path().visible = true;
+    }
   }
 
 
   render() {
-    this.currentPath().intersect(this.dom_hand().object.position);
+
+    let [started, ended] = this.current_path().update(this.dom_hand().object.position);
+    if (started) { this.logging = true; }
+    if (ended && this.logging) {
+      this.logging = false;
+      this.log_data.push([]);
+      this.paths.forEach(p => p.visible = false);
+      setTimeout(() => this.current_path().visible = true, 3000);
+    }
+
     this.renderer.render(this.scene, this.camera);
+
   }
 
   log() {
-    let now = performance.now();
-    this.log_data.at(-1)?.push([
-      now,
-      ...this.dom_hand().object.position.toArray(),
-      this.currentPath().distanceTo(this.dom_hand().object.position),
-    ]);
+    if (this.logging) {
+      let now = performance.now();
+      this.log_data.at(-1)?.push([
+        now,
+        ...this.dom_hand().object.position.toArray(),
+        this.current_path().distanceTo(this.dom_hand().object.position),
+      ]);
+    }
     // NOTE: does this even need to be perfectly synchronous? how much data do we need?
     setTimeout(this.log.bind(this), 16);
   }
@@ -172,7 +183,7 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
   }
 
 
-  currentPath() {
+  current_path() {
     return this.paths.at(Math.floor((this.log_data.length - 1) / this.trials)) ?? this.paths.at(-1);
   }
   dom_hand() {
