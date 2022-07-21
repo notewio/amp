@@ -93,6 +93,10 @@ function forward_kinematics(arm, base, pos = new THREE.Vector3()) {
 // NOTE: this still relies on mathjs. would be nice to remove a dependency, but manual matrix inversion implementation... ugh
 function inverse_kinematics(target, endpoint, joints, damping = 0.2) {
 
+  let dist = math.subtract(target.toArray(), joints[0].origin.position.toArray()).slice(1, 3);
+  dist = dist.map(x => x ** 2).reduce((s, e) => s + e, 0);
+  let max_dist = joints.reduce((s, e) => s + e.length, 0) ** 2;
+
   let v = math.subtract(target.toArray(), endpoint.toArray());
 
   /* Iterating over each joint gives us [dx, dy, dz] in a row of the matrix
@@ -118,8 +122,22 @@ function inverse_kinematics(target, endpoint, joints, damping = 0.2) {
       math.multiply(J_plus, J)
     ),
     joints.map(joint => {
-      let diff = Math.abs(joint.rest_angle - joint.angle);
-      return Math.min(Math.min(TAU - diff, diff) / joint.range * 2, 1) ** 2 * 2;
+
+      // Get difference from the rest angle
+      let cost = Math.abs(joint.rest_angle - joint.angle);
+      cost = Math.min(TAU - cost, cost);
+
+      // Normalize based on full range of motion, and clip at 1
+      cost = Math.min(cost / joint.range * 2, 1);
+
+      // Less cost when close to rest position
+      cost **= 8;
+
+      // Favor the DLS over cost when close to singularity
+      cost *= dist / max_dist;
+
+      return cost;
+
     }),
   );
 
