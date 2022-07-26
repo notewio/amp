@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { VRButton } from "vrbutton";
 import { LinePath } from "./task.js";
+import { XRControllerModelFactory } from "xrcontrollermodelfactory";
 
 
 function round(x, n = 4) {
@@ -63,6 +64,8 @@ class App {
 
     document.body.appendChild(VRButton.createButton(this.renderer));
 
+    const controllerModelFactory = new XRControllerModelFactory();
+
     this.controllers = [0, 1].map(index => {
       let controller = this.renderer.xr.getController(index);
       controller.addEventListener("squeezestart", this.reset.bind(this));
@@ -71,10 +74,8 @@ class App {
       let grip = this.renderer.xr.getControllerGrip(index);
       this.scene.add(grip);
 
-      let object = new THREE.Mesh(
-        new THREE.BoxGeometry(0.07, 0.07, 0.07),
-        new THREE.MeshStandardMaterial({ color: 0xff0000 })
-      );
+      let object = new THREE.Object3D();
+      object.add(controllerModelFactory.createControllerModel(grip));
       this.scene.add(object);
 
       return {
