@@ -13,6 +13,17 @@ class Path extends THREE.Mesh {
     });
     super(geometry, material);
 
+    const line_geometry = new THREE.BufferGeometry().setFromPoints(curve.getPoints(32));
+    const line_material = new THREE.LineBasicMaterial({ color: 0x0000ff });
+    this.line = new THREE.Line(line_geometry, line_material);
+    this.add(this.line);
+
+    const dir = new THREE.Vector3().subVectors(end_pos, start_pos).normalize();
+    const length = 0.1;
+    const origin = new THREE.Vector3().copy(dir).negate().multiplyScalar(0.5 * length);
+    this.arrow = new THREE.ArrowHelper(dir, origin, length, 0x0000ff, 0.2 * length, 0.08 * length);
+    this.add(this.arrow);
+
     this.curve = curve;
     this.start_pos = start_pos;
     this.end_pos = end_pos;
@@ -21,9 +32,9 @@ class Path extends THREE.Mesh {
 
   update(point) {
     let v = new THREE.Vector3();
-    let start = point.distanceTo(v.copy(this.start_pos).applyEuler(this.rotation).add(this.position)) < 0.06;
+    let start = point.distanceTo(v.copy(this.start_pos).applyEuler(this.rotation).add(this.position)) < 0.06 && this.visible;
     let end = point.distanceTo(v.copy(this.end_pos).applyEuler(this.rotation).add(this.position)) < 0.06;
-    if (start && this.visible) {
+    if (start) {
       this.material.color.setHex(0x88ff88);
     }
     if (end) {

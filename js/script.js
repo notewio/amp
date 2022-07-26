@@ -15,6 +15,7 @@ const init = {
   amplification: "2 2 2",
   hand: 0,
   height: 1.8,
+  scale: 0.4,
   start: () => start(),
 };
 
@@ -32,6 +33,9 @@ init_gui.add(init, "hand", { Left: 0, Right: 1 })
 
 init_gui.add(init, "height")
   .name("Height (m)");
+
+init_gui.add(init, "scale")
+  .name("Task scale (m)");
 
 init_gui.add(init, "start")
   .name("Initialize");

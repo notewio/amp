@@ -10,6 +10,8 @@ const TAU = Math.PI * 2;
     length: float      Length of arm segment
     angle: float       Angle of rotation around axis, in radians
     origin: Object3D   Position and orientation of joint in world space
+    rest_angle: float  Angle to try to keep the joint at, in radians
+    range: float       Range of motion, in radians
 */
 class Joint {
   constructor(axis, length = 0, angle = 0, rest_angle = 0, range = TAU) {

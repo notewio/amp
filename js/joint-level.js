@@ -16,7 +16,7 @@ class JointApp extends App {
   initIK() {
 
     this.arm = [
-      new Joint(new THREE.Vector3(1, 0, 0), 1, 0, Math.PI), // Shoulder
+      new Joint(new THREE.Vector3(1, 0, 0), 1, 0, Math.PI, 3 * Math.PI / 2), // Shoulder
       new Joint(new THREE.Vector3(1, 0, 0), 1, 0, Math.PI / 2, Math.PI), // Elbow
     ];
     this.amplified_arm = this.arm.map(x => x.clone());

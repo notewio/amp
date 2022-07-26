@@ -91,10 +91,10 @@ class App {
   initTask() {
 
     this.paths = [
-      new LinePath(), // Vertical line
-      new LinePath(), // Horizontal line
-      new LinePath(), // Angled line
-      new SemicirclePath(), // Semicircle
+      new LinePath(this.settings.scale), // Vertical line
+      new LinePath(this.settings.scale), // Horizontal line
+      new LinePath(this.settings.scale), // Angled line
+      new SemicirclePath(this.settings.scale), // Semicircle
     ];
     this.paths[1].rotation.x = -Math.PI / 2;
     this.paths[2].rotation.x = -Math.PI / 4;
@@ -144,7 +144,7 @@ class App {
       ]);
     }
     // NOTE: does this even need to be perfectly synchronous? how much data do we need?
-    setTimeout(this.log.bind(this), 16);
+    setTimeout(this.log.bind(this), 10);
   }
 
 
