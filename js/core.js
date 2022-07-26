@@ -165,6 +165,42 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
 
 `;
 
+    let v1 = new THREE.Vector3();
+    let v2 = new THREE.Vector3();
+    this.log_data.forEach((trial, j) => {
+
+      let total_length = trial.reduce((s, t, i) => {
+        if (i + 1 < trial.length) {
+          v1.fromArray(t, 1);
+          v2.fromArray(trial[i + 1], 1);
+          return s + v1.distanceTo(v2);
+        } else {
+          return s;
+        }
+      }, 0);
+
+      let dist = 0;
+      trial.forEach((t, i) => {
+        v1.fromArray(t, 1);
+        if (i > 0) {
+          v2.fromArray(trial[i - 1], 1);
+          dist += v1.distanceTo(v2);
+        }
+        let path = this.paths.at(Math.floor(j / this.trials));
+        let point = path
+          .curve
+          .getPointAt(dist / total_length, v2)
+          .add(path.position)
+          .applyEuler(path.rotation);
+
+        t.pop();
+        v1.x = 0;
+        point.x = 0;
+        t.push(v1.distanceTo(point));
+      });
+
+    });
+
     content += this.log_data.map((_, i) => `Trial ${i} Time (ms),x,y,z,err`).join(",");
     for (let i = 0; i < Math.max(...this.log_data.map(x => x.length)); i++) {
       content += "\n";
@@ -176,6 +212,7 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
           } else {
             content += ",".repeat(trial[0].length);
           }
+
         }
       });
     }
