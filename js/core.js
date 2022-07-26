@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { VRButton } from "vrbutton";
-import { LinePath } from "./task.js";
+import { LinePath, SemicirclePath } from "./task.js";
 import { XRControllerModelFactory } from "xrcontrollermodelfactory";
 
 
@@ -91,10 +91,13 @@ class App {
   initTask() {
 
     this.paths = [
-      new LinePath(),
-      new LinePath(),
+      new LinePath(), // Vertical line
+      new LinePath(), // Horizontal line
+      new LinePath(), // Angled line
+      new SemicirclePath(), // Semicircle
     ];
-    this.paths[1].rotation.x = Math.PI / 2;
+    this.paths[1].rotation.x = -Math.PI / 2;
+    this.paths[2].rotation.x = -Math.PI / 4;
     this.paths.forEach(p => {
       this.scene.add(p);
       p.visible = false;
@@ -136,7 +139,6 @@ class App {
       let now = performance.now();
       this.log_data.at(-1)?.push([
         now,
-        ...this.dom_hand().grip.position.toArray(),
         ...this.dom_hand().object.position.toArray(),
         this.current_path().distanceTo(this.dom_hand().object.position),
       ]);
@@ -149,7 +151,7 @@ class App {
   reset() {
     this.paths.forEach(path => {
       path.position.copy(this.dom_hand().grip.position);
-      path.position.y += this.approx_arm_length / 2; // TODO: do a real shoulder estimation
+      path.position.y += this.approx_arm_length * 0.43;
     });
   }
 
@@ -163,7 +165,7 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
 
 `;
 
-    content += this.log_data.map((_, i) => `Trial ${i} Time (ms),rx,ry,rz,ax,ay,az,err`).join(",");
+    content += this.log_data.map((_, i) => `Trial ${i} Time (ms),x,y,z,err`).join(",");
     for (let i = 0; i < Math.max(...this.log_data.map(x => x.length)); i++) {
       content += "\n";
       this.log_data.forEach(trial => {
