@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { VRButton } from "vrbutton";
-import { LinePath, SemicirclePath } from "./task.js";
+import { ComplexPath, LinePath, SemicirclePath } from "./task.js";
 import { XRControllerModelFactory } from "xrcontrollermodelfactory";
 
 
@@ -140,7 +140,6 @@ class App {
       this.log_data.at(-1)?.push([
         now,
         ...this.dom_hand().object.position.toArray(),
-        this.current_path().distanceTo(this.dom_hand().object.position),
       ]);
     }
     // NOTE: does this even need to be perfectly synchronous? how much data do we need?
@@ -156,6 +155,15 @@ class App {
   }
 
   export() {
+
+    this.log_data.forEach((trial, i) => {
+      let path = this.paths[Math.floor(i / this.trials)];
+      let v = new THREE.Vector3();
+      trial.forEach(t => {
+        v.fromArray(t, 1);
+        t.push(path.distanceTo(v));
+      });
+    });
 
     let content = `Exported at ${new Date().toISOString()}
 

@@ -4,7 +4,7 @@ import * as THREE from "three";
 class Path extends THREE.Mesh {
   constructor(start_pos, end_pos, curve) {
 
-    const geometry = new THREE.TubeGeometry(curve, 30, 0.08, 16);
+    const geometry = new THREE.TubeGeometry(curve, 30, 0.03, 16);
     const material = new THREE.MeshToonMaterial({
       color: 0xaaaaaa,
       transparent: true,
@@ -32,8 +32,8 @@ class Path extends THREE.Mesh {
 
   update(point) {
     let v = new THREE.Vector3();
-    let start = point.distanceTo(v.copy(this.start_pos).applyEuler(this.rotation).add(this.position)) < 0.06 && this.visible;
-    let end = point.distanceTo(v.copy(this.end_pos).applyEuler(this.rotation).add(this.position)) < 0.06;
+    let start = point.distanceTo(v.copy(this.start_pos).applyEuler(this.rotation).add(this.position)) < 0.03 && this.visible;
+    let end = point.distanceTo(v.copy(this.end_pos).applyEuler(this.rotation).add(this.position)) < 0.03;
     if (start) {
       this.material.color.setHex(0x88ff88);
     }
@@ -60,7 +60,7 @@ class LinePath extends Path {
   }
 }
 
-// NOTE: for some reason THREE.EllipseCurve does not work (position values become NaN???)
+// NOTE: for some reason THREE.EllipseCurve does not work (position values become NaN???) (I think it's because it's only a 2D curve)
 class SemicircleCurve extends THREE.Curve {
   constructor(scale = 1) {
     super();
@@ -68,10 +68,11 @@ class SemicircleCurve extends THREE.Curve {
   }
 
   getPoint(t, optionalTarget = new THREE.Vector3()) {
-    const tx = 0;
-    const ty = Math.sin(Math.PI * t + Math.PI / 2);
-    const tz = Math.cos(Math.PI * t + Math.PI / 2);
-    return optionalTarget.set(tx, ty, tz).multiplyScalar(this.scale);
+    return optionalTarget.set(
+      0,
+      Math.sin(Math.PI * t + Math.PI / 2),
+      Math.cos(Math.PI * t + Math.PI / 2),
+    ).multiplyScalar(this.scale);
   }
 }
 class SemicirclePath extends Path {
@@ -88,4 +89,34 @@ class SemicirclePath extends Path {
 }
 
 
-export { LinePath, SemicirclePath }
+class ComplexCurve extends THREE.Curve {
+  constructor(scale = 1) {
+    super();
+    this.scale = scale;
+  }
+
+  getPoint(t, optionalTarget = new THREE.Vector3()) {
+    // TODO: make this the actual complex curve
+    // NOTE: scale is doubled I think?
+    return optionalTarget.set(
+      0,
+      Math.sin(2 * Math.PI * t),
+      t,
+    ).multiplyScalar(this.scale);
+  }
+}
+class ComplexPath extends Path {
+  constructor(scale = 0.4) {
+    let start_pos = new THREE.Vector3(0, -scale / 2, 0);
+    let end_pos = new THREE.Vector3(0, scale / 2, 0);
+    let curve = new ComplexCurve(scale);
+    super(start_pos, end_pos, curve);
+  }
+  distanceTo(point) {
+    // TODO: figure out this math
+    return 1;
+  }
+}
+
+
+export { LinePath, SemicirclePath, ComplexPath }
