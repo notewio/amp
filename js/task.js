@@ -97,11 +97,10 @@ class ComplexCurve extends THREE.Curve {
 
   getPoint(t, optionalTarget = new THREE.Vector3()) {
     // TODO: make this the actual complex curve
-    // NOTE: scale is doubled I think?
     return optionalTarget.set(
       0,
+      t - 0.5,
       Math.sin(2 * Math.PI * t),
-      t,
     ).multiplyScalar(this.scale);
   }
 }
@@ -113,8 +112,12 @@ class ComplexPath extends Path {
     super(start_pos, end_pos, curve);
   }
   distanceTo(point) {
-    // TODO: figure out this math
-    return 1;
+    // TODO: make this not take 100000 years to run
+    let translated = new THREE.Vector3().subVectors(point, this.position).applyEuler(this.rotation);
+    translated.x = 0;
+    let points = this.curve.getSpacedPoints(100);
+    let distances = points.map(p => translated.distanceTo(p));
+    return Math.min(...distances);
   }
 }
 

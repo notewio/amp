@@ -95,6 +95,7 @@ class App {
       new LinePath(this.settings.scale), // Horizontal line
       new LinePath(this.settings.scale), // Angled line
       new SemicirclePath(this.settings.scale), // Semicircle
+      new ComplexPath(this.settings.scale), // Complex path
     ];
     this.paths[1].rotation.x = -Math.PI / 2;
     this.paths[2].rotation.x = -Math.PI / 4;
