@@ -97,7 +97,7 @@ class JointApp extends App {
     // Set path position
     this.paths.forEach(path => {
       path.position.copy(this.shoulder);
-      path.position.z -= this.approx_arm_length * 0.5;
+      path.position.z -= this.approx_arm_length * 0.43;
     });
 
   }

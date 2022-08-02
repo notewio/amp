@@ -4,7 +4,7 @@ import * as THREE from "three";
 class Path extends THREE.Mesh {
   constructor(start_pos, end_pos, curve) {
 
-    const geometry = new THREE.TubeGeometry(curve, 30, 0.03, 16);
+    const geometry = new THREE.TubeGeometry(curve, 30, 0.02, 16);
     const material = new THREE.MeshToonMaterial({
       color: 0xaaaaaa,
       transparent: true,
@@ -32,8 +32,8 @@ class Path extends THREE.Mesh {
 
   update(point) {
     let v = new THREE.Vector3();
-    let start = point.distanceTo(v.copy(this.start_pos).applyEuler(this.rotation).add(this.position)) < 0.03 && this.visible;
-    let end = point.distanceTo(v.copy(this.end_pos).applyEuler(this.rotation).add(this.position)) < 0.03;
+    let start = point.distanceTo(v.copy(this.start_pos).applyEuler(this.rotation).add(this.position)) < 0.02 && this.visible;
+    let end = point.distanceTo(v.copy(this.end_pos).applyEuler(this.rotation).add(this.position)) < 0.02;
     if (start) {
       this.material.color.setHex(0x88ff88);
     }
@@ -100,22 +100,22 @@ class ComplexCurve extends THREE.Curve {
     return optionalTarget.set(
       0,
       t - 0.5,
-      Math.sin(2 * Math.PI * t),
+      0.7 * Math.sin(2 * Math.PI * t) + 0.3 * Math.cos(4 * Math.PI * t + 0.5),
     ).multiplyScalar(this.scale);
   }
 }
 class ComplexPath extends Path {
   constructor(scale = 0.4) {
-    let start_pos = new THREE.Vector3(0, -scale / 2, 0);
-    let end_pos = new THREE.Vector3(0, scale / 2, 0);
+    let start_pos = new THREE.Vector3(0, -scale / 2, 0.263 * scale);
+    let end_pos = new THREE.Vector3(0, scale / 2, 0.263 * scale);
     let curve = new ComplexCurve(scale);
     super(start_pos, end_pos, curve);
   }
   distanceTo(point) {
-    // TODO: make this not take 100000 years to run
+    // TODO: make this not take 100000 years to run (actually it's not half bad but would be nice)
     let translated = new THREE.Vector3().subVectors(point, this.position).applyEuler(this.rotation);
     translated.x = 0;
-    let points = this.curve.getSpacedPoints(100);
+    let points = this.curve.getSpacedPoints(200);
     let distances = points.map(p => translated.distanceTo(p));
     return Math.min(...distances);
   }
