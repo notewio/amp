@@ -7,6 +7,16 @@ import { XRControllerModelFactory } from "xrcontrollermodelfactory";
 function round(x, n = 4) {
   return Math.round(x * 10 ** n) / 10 ** n;
 }
+function shuffle(array) {
+  let currentIndex = array.length, randomIndex;
+  while (currentIndex != 0) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+  return array;
+}
 
 
 class App {
@@ -90,15 +100,23 @@ class App {
 
   initTask() {
 
-    this.paths = [
-      new LinePath(this.settings.scale), // Vertical line
-      new LinePath(this.settings.scale), // Horizontal line
-      new LinePath(this.settings.scale), // Angled line
-      new SemicirclePath(this.settings.scale), // Semicircle
-      new ComplexPath(this.settings.scale), // Complex path
-    ];
-    this.paths[1].rotation.x = -Math.PI / 2;
-    this.paths[2].rotation.x = -Math.PI / 4;
+    this.paths = [];
+    for (let i = 0; i < this.trials; i++) { this.paths.push(new LinePath(this.settings.scale)) } // Vertical line
+    for (let i = 0; i < this.trials; i++) {
+      let p = new LinePath(this.settings.scale);
+      p.rotation.x = -Math.PI / 2;
+      this.paths.push(p);
+    } // Horizontal line
+    for (let i = 0; i < this.trials; i++) {
+      let p = new LinePath(this.settings.scale);
+      p.rotation.x = -Math.PI / 4;
+      this.paths.push(p);
+    } // Angled line
+    for (let i = 0; i < this.trials; i++) { this.paths.push(new SemicirclePath(this.settings.scale)) } // Semicircle
+    for (let i = 0; i < this.trials; i++) { this.paths.push(new ComplexPath(this.settings.scale)) } // Complex path
+
+    if (this.settings.randomized) { shuffle(this.paths) }
+
     this.paths.forEach(p => {
       this.scene.add(p);
       p.visible = false;
@@ -174,7 +192,7 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
 
 `;
 
-    content += this.log_data.map((_, i) => `Trial ${i} Time (ms),x,y,z,err`).join(",");
+    content += this.log_data.map((_, i) => `Trial ${i} ${this.paths[i].constructor.name} Time (ms),x,y,z,err`).join(",");
     for (let i = 0; i < Math.max(...this.log_data.map(x => x.length)); i++) {
       content += "\n";
       this.log_data.forEach(trial => {
@@ -200,7 +218,7 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
 
 
   current_path() {
-    return this.paths.at(Math.floor((this.log_data.length - 1) / this.trials)) ?? this.paths.at(-1);
+    return this.paths.at(this.log_data.length - 1) ?? this.paths.at(-1);
   }
   dom_hand() {
     return this.controllers[this.hand];

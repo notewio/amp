@@ -12,6 +12,7 @@ const init_gui = gui.addFolder("Init options");
 const init = {
   level: "joint",
   trials: 10,
+  randomized: false,
   amplification: "2 2 2",
   hand: 0,
   height: 1.8,
@@ -24,6 +25,9 @@ init_gui.add(init, "level", ["joint", "endpoint", "none"])
 
 init_gui.add(init, "trials")
   .name("Trials per shape");
+
+init_gui.add(init, "randomized")
+  .name("Randomize order");
 
 init_gui.add(init, "amplification")
   .name("Amp amount");
