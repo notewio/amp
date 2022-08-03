@@ -176,7 +176,7 @@ class App {
   export() {
 
     this.log_data.forEach((trial, i) => {
-      let path = this.paths[Math.floor(i / this.trials)];
+      let path = this.paths[Math.floor(i / this.trials)] ?? this.paths.at(-1);
       let v = new THREE.Vector3();
       trial.forEach(t => {
         v.fromArray(t, 1);
@@ -192,7 +192,7 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
 
 `;
 
-    content += this.log_data.map((_, i) => `Trial ${i} ${this.paths[i].constructor.name} Time (ms),x,y,z,err`).join(",");
+    content += this.log_data.map((_, i) => `Trial ${i} ${this.paths[i]?.constructor.name} ${this.paths[i]?.rotation.x} Time (ms),x,y,z,err`).join(",");
     for (let i = 0; i < Math.max(...this.log_data.map(x => x.length)); i++) {
       content += "\n";
       this.log_data.forEach(trial => {

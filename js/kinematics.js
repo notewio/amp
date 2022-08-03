@@ -87,7 +87,7 @@ function forward_kinematics(arm, base, pos = new THREE.Vector3()) {
   Calculate joint angles from a current endpoint position and target position
     target: Vector3    Target position
     endpoint: Vector3  Current position of end effector
-    arm: Array<Joint>  Joints in system
+    joints: Array<Joint>  Joints in system
     damping: float     Damping to use in inverse
 
     Returns array of delta theta
@@ -136,7 +136,7 @@ function inverse_kinematics(target, endpoint, joints, damping = 0.2) {
       cost **= 8;
 
       // Favor the DLS over cost when close to singularity
-      cost *= dist / max_dist;
+      cost *= (dist / max_dist) ** 2;
 
       return cost;
 

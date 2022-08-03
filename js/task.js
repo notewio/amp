@@ -13,14 +13,9 @@ class Path extends THREE.Mesh {
     });
     super(geometry, material);
 
-    const line_geometry = new THREE.BufferGeometry().setFromPoints(curve.getPoints(32));
-    const line_material = new THREE.LineBasicMaterial({ color: 0x0000ff });
-    this.line = new THREE.Line(line_geometry, line_material);
-    this.add(this.line);
-
-    const dir = new THREE.Vector3().subVectors(end_pos, start_pos).normalize();
+    const dir = curve.getTangent(0);
     const length = 0.1;
-    const origin = new THREE.Vector3().copy(dir).negate().multiplyScalar(0.5 * length);
+    const origin = start_pos.clone();
     this.arrow = new THREE.ArrowHelper(dir, origin, length, 0x0000ff, 0.2 * length, 0.08 * length);
     this.add(this.arrow);
 
@@ -100,14 +95,14 @@ class ComplexCurve extends THREE.Curve {
     return optionalTarget.set(
       0,
       t - 0.5,
-      0.7 * Math.sin(2 * Math.PI * t) + 0.3 * Math.cos(4 * Math.PI * t + 0.5),
+      Math.sin(2 * Math.PI * t) / 2,
     ).multiplyScalar(this.scale);
   }
 }
 class ComplexPath extends Path {
   constructor(scale = 0.4) {
-    let start_pos = new THREE.Vector3(0, -scale / 2, 0.263 * scale);
-    let end_pos = new THREE.Vector3(0, scale / 2, 0.263 * scale);
+    let start_pos = new THREE.Vector3(0, -scale / 2, 0);
+    let end_pos = new THREE.Vector3(0, scale / 2, 0);
     let curve = new ComplexCurve(scale);
     super(start_pos, end_pos, curve);
   }
