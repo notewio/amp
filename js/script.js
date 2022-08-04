@@ -17,6 +17,7 @@ const init = {
   hand: 0,
   height: 1.8,
   scale: 0.4,
+  object: "controller",
   start: () => start(),
 };
 
@@ -40,6 +41,9 @@ init_gui.add(init, "height")
 
 init_gui.add(init, "scale")
   .name("Task scale (m)");
+
+init_gui.add(init, "object", ["controller", "cube"])
+  .name("Controller object");
 
 init_gui.add(init, "start")
   .name("Initialize");

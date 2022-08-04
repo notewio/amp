@@ -78,14 +78,27 @@ class App {
 
     this.controllers = [0, 1].map(index => {
       let controller = this.renderer.xr.getController(index);
-      controller.addEventListener("squeezestart", this.reset.bind(this));
+      controller.addEventListener("squeezestart", () => {
+        if (this.log_data.length == 0) {
+          this.reset();
+        }
+      });
       this.scene.add(controller);
 
       let grip = this.renderer.xr.getControllerGrip(index);
       this.scene.add(grip);
 
       let object = new THREE.Object3D();
-      object.add(controllerModelFactory.createControllerModel(grip));
+      if (this.settings.object === "controller") {
+        object.add(controllerModelFactory.createControllerModel(grip));
+      } else {
+        object.add(
+          new THREE.Mesh(
+            new THREE.BoxGeometry(0.02, 0.02, 0.02),
+            new THREE.MeshStandardMaterial({ color: 0xff0000 })
+          )
+        );
+      }
       this.scene.add(object);
 
       return {
