@@ -19,6 +19,7 @@ const init = {
   height: 1.8,
   scale: 0.4,
   object: "controller",
+  hide_arm: false,
   start: () => start(),
 };
 
@@ -45,6 +46,9 @@ init_gui.add(init, "scale")
 
 init_gui.add(init, "object", ["controller", "cube"])
   .name("Controller object");
+
+init_gui.add(init, "hide_arm")
+  .name("Hide arm during test");
 
 init_gui.add(init, "start")
   .name("Initialize");

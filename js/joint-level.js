@@ -22,14 +22,19 @@ class JointApp extends App {
     this.amplified_arm = this.arm.map(x => x.clone());
 
     this.arm.forEach(joint => joint.create_geometry(this.scene));
+    this.amplified_arm.forEach(joint => joint.create_geometry(this.scene));
 
     this.shoulder = new THREE.Vector3(0, 1.5, 0);
 
   }
 
   onSelectStart(event) {
-    if (this.log_data.length === 0) {
+    if (this.settings.hide_arm && this.log_data.length === 0) {
       this.arm.forEach(joint => {
+        joint.sphere.visible = false;
+        joint.cylinder.visible = false;
+      });
+      this.amplified_arm.forEach(joint => {
         joint.sphere.visible = false;
         joint.cylinder.visible = false;
       });
