@@ -23,8 +23,12 @@ class Joint {
     this.origin = new THREE.Object3D();
   }
 
-  create_geometry(scene) {
+  create_geometry(scene, opacity = 1) {
     const material = new THREE.MeshStandardMaterial();
+    if (opacity !== 1) {
+      material.transparent = true;
+      material.opacity = opacity;
+    }
     const sphere = new THREE.SphereGeometry(0.03, 16, 8);
     const cylinder = new THREE.CylinderGeometry(0.02, 0.02, 1, 8, true);
     cylinder.scale(1, this.length, 1);

@@ -17,6 +17,7 @@ const init = {
   amplification: "2 2 2",
   hand: 0,
   height: 1.8,
+  shoulder: 0.05,
   scale: 0.4,
   object: "controller",
   hide_arm: false,
@@ -40,6 +41,9 @@ init_gui.add(init, "hand", { Left: 0, Right: 1 })
 
 init_gui.add(init, "height")
   .name("Height (m)");
+
+init_gui.add(init, "shoulder")
+  .name("Shoulder (+behind)");
 
 init_gui.add(init, "scale")
   .name("Task scale (m)");

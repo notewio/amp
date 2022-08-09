@@ -21,7 +21,7 @@ class JointApp extends App {
     ];
     this.amplified_arm = this.arm.map(x => x.clone());
 
-    this.arm.forEach(joint => joint.create_geometry(this.scene));
+    this.arm.forEach(joint => joint.create_geometry(this.scene, 0.5));
     this.amplified_arm.forEach(joint => joint.create_geometry(this.scene));
 
     this.shoulder = new THREE.Vector3(0, 1.5, 0);
@@ -82,7 +82,7 @@ class JointApp extends App {
     //   Place controller in front of shoulder,
     //   offset behind squeezed controller position
     this.shoulder.copy(offhand.grip.position);
-    this.shoulder.z += 0.05; // TODO: not hardcoded?
+    this.shoulder.z += this.settings.shoulder;
 
     // Set arm segment lengths:
     //   Arm should be in saggital plane,
