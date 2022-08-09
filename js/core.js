@@ -175,7 +175,7 @@ class App {
       ]);
     }
     // NOTE: does this even need to be perfectly synchronous? how much data do we need?
-    setTimeout(this.log.bind(this), 10);
+    setTimeout(this.log.bind(this), 1);
   }
 
 
