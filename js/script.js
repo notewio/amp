@@ -114,6 +114,9 @@ function start() {
     .name("Reset position");
 
   live_gui.add(app, "export")
-    .name("Export position log");
+    .name("Export position log (CSV)");
+
+  live_gui.add(app, "export_json")
+    .name("Export position log (JSON)");
 
 }

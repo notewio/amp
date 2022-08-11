@@ -172,6 +172,7 @@ class App {
       this.log_data.at(-1)?.push([
         now,
         ...this.dom_hand().object.position.toArray(),
+        ...this.dom_hand().grip.position.toArray(),
       ]);
     }
     // NOTE: does this even need to be perfectly synchronous? how much data do we need?
@@ -189,7 +190,7 @@ class App {
   export() {
 
     this.log_data.forEach((trial, i) => {
-      let path = this.paths[Math.floor(i / this.trials)] ?? this.paths.at(-1);
+      let path = this.paths[i] ?? this.paths.at(-1);
       let v = new THREE.Vector3();
       trial.forEach(t => {
         v.fromArray(t, 1);
@@ -227,6 +228,37 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
     link.setAttribute('download', "export.csv");
     link.click();
 
+  }
+
+  export_json() {
+    let content = {
+      timestamp: new Date().toISOString(),
+      level: this.settings.level,
+      amount: this.settings.amplification,
+      path: this.paths[0].position.toArray(),
+      trials: [],
+    }
+    this.log_data.forEach((trial, i) => {
+      let path = this.paths[i] ?? this.paths.at(-1);
+      let v = new THREE.Vector3();
+      trial.forEach(t => {
+        v.fromArray(t, 1);
+        t.push(path.distanceTo(v));
+      });
+
+      content.trials.push({
+        path_type: path.constructor.name,
+        path_rot: path.rotation.x,
+        data: trial,
+      });
+    });
+
+    let blob = new Blob([JSON.stringify(content)], { type: "text/json;charset=utf-8;" });
+    let url = URL.createObjectURL(blob);
+    let link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', "export.json");
+    link.click();
   }
 
 
