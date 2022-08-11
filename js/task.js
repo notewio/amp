@@ -65,16 +65,16 @@ class SemicircleCurve extends THREE.Curve {
   getPoint(t, optionalTarget = new THREE.Vector3()) {
     return optionalTarget.set(
       0,
-      Math.sin(Math.PI * t + Math.PI / 2),
-      Math.cos(Math.PI * t + Math.PI / 2),
-    ).multiplyScalar(this.scale);
+      Math.cos(Math.PI * t + Math.PI),
+      Math.sin(Math.PI * t + Math.PI),
+    ).multiplyScalar(this.scale / 2);
   }
 }
 class SemicirclePath extends Path {
   constructor(scale = 0.4) {
     let start_pos = new THREE.Vector3(0, -scale / 2, 0);
     let end_pos = new THREE.Vector3(0, scale / 2, 0);
-    let curve = new SemicircleCurve(scale / 2);
+    let curve = new SemicircleCurve(scale);
     super(start_pos, end_pos, curve);
   }
   distanceTo(point) {

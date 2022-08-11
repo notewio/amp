@@ -94,15 +94,24 @@ function start() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.beginPath();
-    ctx.arc(125, 125, 4, 0, 2 * Math.PI, false);
-    ctx.fillStyle = "red";
-    ctx.fill();
+    app.current_path().curve.getPoints(8).forEach(p => {
+      // TODO: for some gogddamn reason SemicircleCurve is flipped?????
+      // why the hell does this happen IDK
+      // not really essential anyways so ill just leave it broken
+      p.applyEuler(app.current_path().rotation);
+      ctx.lineTo(
+        125 + p.z * 150,
+        125 + p.y * 150,
+      );
+    });
+    ctx.strokeStyle = "white";
+    ctx.stroke();
     ctx.closePath();
 
     ctx.beginPath();
     ctx.arc(
-      (app.paths[0].position.z - app.dom_hand().object.position.z) * 100 + 125,
-      (app.paths[0].position.y - app.dom_hand().object.position.y) * 100 + 125,
+      (app.paths[0].position.z - app.dom_hand().object.position.z) * 150 + 125,
+      (app.paths[0].position.y - app.dom_hand().object.position.y) * 150 + 125,
       4, 0, 2 * Math.PI, false
     );
     ctx.fillStyle = "white";
