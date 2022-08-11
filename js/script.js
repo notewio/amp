@@ -81,6 +81,35 @@ function start() {
       .disable();
   });
 
+  live_gui.add(app.dom_hand().object.position, "x").listen().disable();
+  live_gui.add(app.dom_hand().object.position, "y").listen().disable();
+  live_gui.add(app.dom_hand().object.position, "z").listen().disable();
+
+  let canvas = document.createElement("canvas");
+  canvas.width = 250;
+  canvas.height = 250;
+  let ctx = canvas.getContext("2d");
+  live_gui.domElement.appendChild(canvas);
+  setInterval(() => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.beginPath();
+    ctx.arc(125, 125, 4, 0, 2 * Math.PI, false);
+    ctx.fillStyle = "red";
+    ctx.fill();
+    ctx.closePath();
+
+    ctx.beginPath();
+    ctx.arc(
+      (app.paths[0].position.z - app.dom_hand().object.position.z) * 100 + 125,
+      (app.paths[0].position.y - app.dom_hand().object.position.y) * 100 + 125,
+      4, 0, 2 * Math.PI, false
+    );
+    ctx.fillStyle = "white";
+    ctx.fill();
+    ctx.closePath();
+  }, 125);
+
   live_gui.add(app, "reset")
     .name("Reset position");
 
