@@ -1,6 +1,9 @@
 import * as THREE from "three";
 
 
+let q = new THREE.Quaternion();
+
+
 class Path extends THREE.Mesh {
   constructor(start_pos, end_pos, curve) {
 
@@ -50,7 +53,9 @@ class LinePath extends Path {
   // NOTE: currently implementing distanceTo as only a 2D thing, within the sagittal plane
   // do we need full 3D here?
   distanceTo(point) {
-    let translated = new THREE.Vector3().subVectors(point, this.position).applyEuler(this.rotation);
+    let translated = new THREE.Vector3()
+      .subVectors(point, this.position)
+      .applyQuaternion(q.setFromEuler(this.rotation).invert());
     return Math.abs(translated.z);
   }
 }
@@ -78,7 +83,9 @@ class SemicirclePath extends Path {
     super(start_pos, end_pos, curve);
   }
   distanceTo(point) {
-    let translated = new THREE.Vector3().subVectors(point, this.position).applyEuler(this.rotation);
+    let translated = new THREE.Vector3()
+      .subVectors(point, this.position)
+      .applyQuaternion(q.setFromEuler(this.rotation).invert());
     return Math.abs(Math.sqrt(translated.y ** 2 + translated.z ** 2) - this.curve.scale / 2);
   }
 }
@@ -108,7 +115,9 @@ class ComplexPath extends Path {
   }
   distanceTo(point) {
     // TODO: make this not take 100000 years to run (actually it's not half bad but would be nice)
-    let translated = new THREE.Vector3().subVectors(point, this.position).applyEuler(this.rotation);
+    let translated = new THREE.Vector3()
+      .subVectors(point, this.position)
+      .applyQuaternion(q.setFromEuler(this.rotation).invert());
     translated.x = 0;
     let points = this.curve.getSpacedPoints(200);
     let distances = points.map(p => translated.distanceTo(p));
