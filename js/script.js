@@ -81,6 +81,13 @@ function start() {
       .disable();
   });
 
+  app.arm?.forEach((joint, i) => {
+    live_gui.add(joint, "length")
+      .name(`Segment ${i}`)
+      .listen()
+      .disable();
+  });
+
   live_gui.add(app.dom_hand().object.position, "x").listen().disable();
   live_gui.add(app.dom_hand().object.position, "y").listen().disable();
   live_gui.add(app.dom_hand().object.position, "z").listen().disable();
