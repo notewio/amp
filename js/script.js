@@ -74,6 +74,11 @@ function start() {
 
   const live_gui = gui.addFolder("Actions");
 
+  live_gui.add(app.log_data, "length")
+    .name("Trial no.")
+    .listen()
+    .disable();
+
   app.arm?.forEach((joint, i) => {
     live_gui.add(joint, "angle", 0, Math.PI * 2)
       .name(`Joint ${i}`)

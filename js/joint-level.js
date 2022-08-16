@@ -24,7 +24,7 @@ class JointApp extends App {
     this.arm.forEach(joint => joint.create_geometry(this.scene, 0.5));
     this.amplified_arm.forEach(joint => joint.create_geometry(this.scene));
 
-    this.shoulder = new THREE.Vector3(0, 1.5, 0);
+    this.shoulder = new THREE.Vector3(0, 1.5, 0.5);
 
   }
 

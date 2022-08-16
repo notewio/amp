@@ -68,6 +68,16 @@ class App {
     cube.position.z = -2;
     this.scene.add(cube);
 
+    let canvas = document.querySelector("#texture");
+    this.texture_canvas = canvas.getContext("2d");
+    this.texture = new THREE.CanvasTexture(canvas);
+    let plane = new THREE.Mesh(
+      new THREE.PlaneGeometry(1, 1),
+      new THREE.MeshBasicMaterial({ map: this.texture, transparent: true }),
+    );
+    plane.position.set(0, 1, -1.5);
+    this.scene.add(plane);
+
   }
 
   initVR() {
@@ -147,6 +157,7 @@ class App {
       this.log_data.push([]);
       this.paths.forEach(p => p.visible = false);
       this.current_path().visible = true;
+      this.renderTexture();
     }
   }
 
@@ -160,10 +171,20 @@ class App {
       this.log_data.push([]);
       this.paths.forEach(p => p.visible = false);
       setTimeout(() => this.current_path().visible = true, 3000);
+      this.renderTexture();
     }
 
     this.renderer.render(this.scene, this.camera);
 
+  }
+
+  renderTexture() {
+    this.texture_canvas.clearRect(0, 0, 400, 400); // TODO: not hardcode
+    this.texture_canvas.font = "50px Helvetica";
+    this.texture_canvas.textAlign = "center";
+    this.texture_canvas.fillStyle = "white";
+    this.texture_canvas.fillText(`Trial ${this.log_data.length}`, 200, 200);
+    this.texture.needsUpdate = true;
   }
 
   log() {
