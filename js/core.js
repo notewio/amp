@@ -173,6 +173,7 @@ class App {
         now,
         ...this.dom_hand().object.position.toArray(),
         ...this.dom_hand().grip.position.toArray(),
+        ...(this.arm ? this.arm.map(j => j.angle) : []),
       ]);
     }
     // NOTE: does this even need to be perfectly synchronous? how much data do we need?

@@ -102,7 +102,7 @@ class ComplexCurve extends THREE.Curve {
     return optionalTarget.set(
       0,
       t - 0.5,
-      Math.sin(2 * Math.PI * t) / 2,
+      Math.sin(2 * Math.PI * t) / 3,
     ).multiplyScalar(this.scale);
   }
 }
