@@ -3,6 +3,9 @@ import * as THREE from "three";
 
 let util_quat = new THREE.Quaternion();
 
+let start_texture = new THREE.TextureLoader().load('../img/start.png');
+let end_texture = new THREE.TextureLoader().load('../img/end.png');
+
 
 class Path extends THREE.Mesh {
   constructor(start_pos, end_pos, curve, dir) {
@@ -23,6 +26,21 @@ class Path extends THREE.Mesh {
       0x0000ff,
       0.2 * 0.1, 0.08 * 0.1
     ));
+
+    let start = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.08, 0.08),
+      new THREE.MeshBasicMaterial({ map: start_texture, transparent: true, depthWrite: false }),
+    );
+    start.position.copy(start_pos);
+    start.position.x += 0.08;
+    this.add(start);
+    let end = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.08, 0.08),
+      new THREE.MeshBasicMaterial({ map: end_texture, transparent: true, depthWrite: false }),
+    );
+    end.position.copy(end_pos);
+    end.position.x -= 0.08;
+    this.add(end);
 
     this.curve = curve;
     this.start_pos = start_pos;

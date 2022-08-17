@@ -12,9 +12,9 @@ let app;
 const init_gui = gui.addFolder("Init options");
 const init = {
   level: "joint",
-  trials: 10,
+  trials: 25,
   randomized: false,
-  amplification: "2 2 2",
+  amplification: "1 1.5",
   hand: 0,
   height: 1.8,
   shoulder: 0.05,
