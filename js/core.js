@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { VRButton } from "vrbutton";
-import { ComplexPath, LinePath, SemicirclePath } from "./task.js";
+import { TrianglePath, SinePath, LinePath } from "./task.js";
 import { XRControllerModelFactory } from "xrcontrollermodelfactory";
 
 
@@ -124,19 +124,9 @@ class App {
   initTask() {
 
     this.paths = [];
-    for (let i = 0; i < this.trials; i++) { this.paths.push(new LinePath(this.settings.scale)) } // Vertical line
-    for (let i = 0; i < this.trials; i++) {
-      let p = new LinePath(this.settings.scale);
-      p.rotation.x = -Math.PI / 2;
-      this.paths.push(p);
-    } // Horizontal line
-    for (let i = 0; i < this.trials; i++) {
-      let p = new LinePath(this.settings.scale);
-      p.rotation.x = -Math.PI / 4;
-      this.paths.push(p);
-    } // Angled line
-    for (let i = 0; i < this.trials; i++) { this.paths.push(new SemicirclePath(this.settings.scale)) } // Semicircle
-    for (let i = 0; i < this.trials; i++) { this.paths.push(new ComplexPath(this.settings.scale)) } // Complex path
+    for (let i = 0; i < this.trials; i++) { this.paths.push(new LinePath(this.settings.scale)) }
+    for (let i = 0; i < this.trials; i++) { this.paths.push(new SinePath(this.settings.scale)) }
+    for (let i = 0; i < this.trials; i++) { this.paths.push(new TrianglePath(this.settings.scale)) }
 
     if (this.settings.randomized) { shuffle(this.paths) }
 
@@ -164,15 +154,19 @@ class App {
 
   render() {
 
-    let [started, ended] = this.current_path().update(this.dom_hand().object.position);
-    if (started) { this.logging = true; }
-    if (ended && this.logging) {
-      this.logging = false;
-      this.log_data.push([]);
-      this.paths.forEach(p => p.visible = false);
-      setTimeout(() => this.current_path().visible = true, 3000);
-      this.renderTexture();
-    }
+    this.current_path().update(
+      this.dom_hand().object.position,
+      () => this.logging = true,
+      () => {
+        if (this.logging) {
+          this.logging = false;
+          this.log_data.push([]);
+          this.paths.forEach(p => p.visible = false);
+          setTimeout(() => this.current_path().visible = true, 3000);
+          this.renderTexture();
+        }
+      },
+    )
 
     this.renderer.render(this.scene, this.camera);
 
