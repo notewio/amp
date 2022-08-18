@@ -1,7 +1,6 @@
 import { EndpointApp } from "./endpoint-level.js";
 import { DefaultApp } from "./no-level.js";
 import { JointApp } from "./joint-level.js";
-import { DoubleApp } from "./double-level.js";
 import { GUI } from "lil-gui";
 
 
@@ -16,7 +15,7 @@ const init = {
   trials: 25,
   randomized: false,
   amplification: "1 1.5",
-  hand: 0,
+  hand: 1,
   height: 1.8,
   shoulder: 0.05,
   scale: 0.4,
@@ -25,8 +24,8 @@ const init = {
   start: () => start(),
 };
 
-init_gui.add(init, "level", ["joint", "endpoint", "none", "double"])
-  .name("Amp level");
+init_gui.add(init, "level", ["joint", "endpoint", "none"])
+  .name("Amplification type");
 
 init_gui.add(init, "paths")
   .name("Shapes to test");
@@ -69,8 +68,6 @@ function start() {
     app = new JointApp(init);
   } else if (init.level === "endpoint") {
     app = new EndpointApp(init);
-  } else if (init.level === "double") {
-    app = new DoubleApp(init);
   } else {
     app = new DefaultApp(init);
   }
@@ -110,7 +107,7 @@ function start() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.beginPath();
-    app.current_path().curve.getPoints(16).forEach(p => {
+    app.current_path().curve.getPoints(20).forEach(p => {
       p.applyEuler(app.current_path().rotation);
       ctx.lineTo(
         125 + p.z * 150,
