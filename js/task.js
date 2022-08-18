@@ -126,6 +126,33 @@ class SinePath extends Path {
   }
 }
 
+class CircleCurve extends THREE.Curve {
+  constructor(scale = 1) {
+    super();
+    this.scale = scale;
+  }
+  getPoint(t, optionalTarget = new THREE.Vector3()) {
+    return optionalTarget.set(
+      0,
+      Math.sin(t * 2 * Math.PI),
+      Math.cos(t * 2 * Math.PI),
+    ).multiplyScalar(this.scale / 2);
+  }
+}
+class CirclePath extends Path {
+  constructor(scale = 0.4) {
+    let start_pos = new THREE.Vector3(0, -scale / 2, 0);
+    let end_pos = new THREE.Vector3(0, -scale / 2, 0);
+    let curve = new CircleCurve(scale);
+    let dir = new THREE.Vector3(0, 0, -1);
+    super(start_pos, end_pos, curve, dir);
+  }
+  distanceTo(point) {
+    let p = this.toLocalSpace(point);
+    return Math.sqrt(p.y ** 2 + p.z ** 2) - this.scale / 2;
+  }
+}
+
 
 class TriangleCurve extends THREE.Curve {
   constructor(scale = 1) {
@@ -153,4 +180,4 @@ class TrianglePath extends Path {
 
 
 
-export { LinePath, SinePath, TrianglePath }
+export { LinePath, SinePath, TrianglePath, CirclePath }

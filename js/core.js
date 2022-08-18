@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { VRButton } from "vrbutton";
-import { TrianglePath, SinePath, LinePath } from "./task.js";
+import { CirclePath, TrianglePath, SinePath, LinePath } from "./task.js";
 import { XRControllerModelFactory } from "xrcontrollermodelfactory";
 
 
@@ -134,6 +134,9 @@ class App {
           break;
         case "triangle":
           for (let i = 0; i < this.trials; i++) { this.paths.push(new TrianglePath(this.settings.scale)) }
+          break;
+        case "circle":
+          for (let i = 0; i < this.trials; i++) { this.paths.push(new CirclePath(this.settings.scale)) }
           break;
       }
     });

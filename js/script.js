@@ -12,7 +12,7 @@ let app;
 const init_gui = gui.addFolder("Init options");
 const init = {
   level: "joint",
-  paths: "sine triangle",
+  paths: "line sine circle triangle",
   trials: 25,
   randomized: false,
   amplification: "1 1.5",
@@ -110,14 +110,11 @@ function start() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     ctx.beginPath();
-    app.current_path().curve.getPoints(8).forEach(p => {
-      // TODO: for some gogddamn reason SemicircleCurve is flipped?????
-      // why the hell does this happen IDK
-      // not really essential anyways so ill just leave it broken
+    app.current_path().curve.getPoints(16).forEach(p => {
       p.applyEuler(app.current_path().rotation);
       ctx.lineTo(
         125 + p.z * 150,
-        125 + p.y * 150,
+        125 - p.y * 150,
       );
     });
     ctx.strokeStyle = "white";
@@ -126,8 +123,8 @@ function start() {
 
     ctx.beginPath();
     ctx.arc(
-      (app.paths[0].position.z - app.dom_hand().object.position.z) * 150 + 125,
-      (app.paths[0].position.y - app.dom_hand().object.position.y) * 150 + 125,
+      (app.dom_hand().object.position.z - app.paths[0].position.z) * 150 + 125,
+      -(app.dom_hand().object.position.y - app.paths[0].position.y) * 150 + 125,
       4, 0, 2 * Math.PI, false
     );
     ctx.fillStyle = "white";
