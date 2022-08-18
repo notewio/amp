@@ -12,6 +12,7 @@ let app;
 const init_gui = gui.addFolder("Init options");
 const init = {
   level: "joint",
+  paths: "sine triangle",
   trials: 25,
   randomized: false,
   amplification: "1 1.5",
@@ -26,6 +27,9 @@ const init = {
 
 init_gui.add(init, "level", ["joint", "endpoint", "none", "double"])
   .name("Amp level");
+
+init_gui.add(init, "paths")
+  .name("Shapes to test");
 
 init_gui.add(init, "trials")
   .name("Trials per shape");

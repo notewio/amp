@@ -124,9 +124,19 @@ class App {
   initTask() {
 
     this.paths = [];
-    for (let i = 0; i < this.trials; i++) { this.paths.push(new LinePath(this.settings.scale)) }
-    for (let i = 0; i < this.trials; i++) { this.paths.push(new SinePath(this.settings.scale)) }
-    for (let i = 0; i < this.trials; i++) { this.paths.push(new TrianglePath(this.settings.scale)) }
+    this.settings.paths.split(" ").forEach(type => {
+      switch (type) {
+        case "line":
+          for (let i = 0; i < this.trials; i++) { this.paths.push(new LinePath(this.settings.scale)) }
+          break;
+        case "sine":
+          for (let i = 0; i < this.trials; i++) { this.paths.push(new SinePath(this.settings.scale)) }
+          break;
+        case "triangle":
+          for (let i = 0; i < this.trials; i++) { this.paths.push(new TrianglePath(this.settings.scale)) }
+          break;
+      }
+    });
 
     if (this.settings.randomized) { shuffle(this.paths) }
 
