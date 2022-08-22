@@ -13,19 +13,28 @@ const init = {
   level: "joint",
   paths: "angled-line sine",
   trials: 50,
-  randomized: false,
+  //  randomized: false,
   amplification: "1 1.5",
   hand: 1,
-  height: 1.8,
-  shoulder: 0.05,
+  // height: 1.8,
+  shoulder: 0.07,
   scale: 0.4,
   object: "cube",
   hide_arm: false,
   start: () => start(),
 };
 
-init_gui.add(init, "level", ["joint", "endpoint", "none"])
-  .name("Amplification type");
+init_gui.add(init, "level", ["joint", "endpoint"]) //, "none"])
+  .name("Amplification type")
+  .onChange(v => {
+    if (v === "endpoint" && init.amplification.match(/ /g)?.length < 2) {
+      init.amplification += " 1";
+    }
+  });
+
+init_gui.add(init, "amplification")
+  .name("Amp amount")
+  .listen();
 
 init_gui.add(init, "paths")
   .name("Shapes to test");
@@ -33,29 +42,26 @@ init_gui.add(init, "paths")
 init_gui.add(init, "trials")
   .name("Trials per shape");
 
-init_gui.add(init, "randomized")
-  .name("Randomize order");
-
-init_gui.add(init, "amplification")
-  .name("Amp amount");
+// init_gui.add(init, "randomized")
+//   .name("Randomize order");
 
 init_gui.add(init, "hand", { Left: 0, Right: 1 })
   .name("Dominant hand");
-
-init_gui.add(init, "height")
-  .name("Height (m)");
-
-init_gui.add(init, "shoulder")
-  .name("Shoulder (+behind)");
-
-init_gui.add(init, "scale")
-  .name("Task scale (m)");
 
 init_gui.add(init, "object", ["controller", "cube"])
   .name("Controller object");
 
 init_gui.add(init, "hide_arm")
   .name("Hide arm during test");
+
+// init_gui.add(init, "height")
+//   .name("Height (m)");
+
+init_gui.add(init, "shoulder")
+  .name("Shoulder offset");
+
+init_gui.add(init, "scale")
+  .name("Size of path (m)");
 
 init_gui.add(init, "start")
   .name("Initialize");
