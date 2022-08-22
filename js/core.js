@@ -236,6 +236,7 @@ class App {
       let v = new THREE.Vector3();
       trial.forEach(t => {
         v.fromArray(t, 1);
+        while (t.length > (this.arm ? 9 : 7)) { t.pop() }
         t.push(path.distanceTo(v));
       });
     });
@@ -248,7 +249,12 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
 
 `;
 
-    content += this.log_data.map((_, i) => `Trial ${i} ${this.paths[i]?.constructor.name} ${this.paths[i]?.rotation.x} Time (ms),x,y,z,err`).join(",");
+    // TODO: incredible formatting
+    content += this.log_data.map((_, i) => `Trial ${i
+      } ${this.paths[i]?.constructor.name
+      } ${this.paths[i]?.rotation.x
+      } Time (ms),Amplified hand x,Amplified hand y,Amplified hand z,Real hand x,Real hand y,Real hand z,${this.arm ? "Shoulder angle,Elbow angle," : ""
+      }err`).join(",");
     for (let i = 0; i < Math.max(...this.log_data.map(x => x.length)); i++) {
       content += "\n";
       this.log_data.forEach(trial => {
