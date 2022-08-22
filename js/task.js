@@ -10,7 +10,7 @@ let end_texture = new THREE.TextureLoader().load('../img/end.png');
 class Path extends THREE.Mesh {
   constructor(start_pos, end_pos, curve, dir) {
 
-    const geometry = new THREE.TubeGeometry(curve, 30, 0.02, 16);
+    const geometry = new THREE.TubeGeometry(curve, 30, 0.03, 16);
     const material = new THREE.MeshToonMaterial({
       color: 0xaaaaaa,
       transparent: true,

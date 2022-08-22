@@ -20,8 +20,7 @@ class JointApp extends App {
       new Joint(new THREE.Vector3(1, 0, 0), 0.1, 0, Math.PI / 2, Math.PI), // Elbow
     ];
     this.amplified_arm = this.arm.map(x => x.clone());
-
-    this.arm.forEach(joint => joint.create_geometry(this.scene, 0.5));
+    // this.arm.forEach(joint => joint.create_geometry(this.scene, 0.5));
     this.amplified_arm.forEach(joint => joint.create_geometry(this.scene));
 
     this.shoulder = new THREE.Vector3(0, 1.5, 0.5);
@@ -102,7 +101,8 @@ class JointApp extends App {
     // Set path position
     this.paths.forEach(path => {
       path.position.copy(this.shoulder);
-      path.position.z -= this.approx_arm_length * 0.43;
+      path.position.z = this.dom_hand().grip.position.z;
+      path.position.z -= 0.05;
     });
 
   }

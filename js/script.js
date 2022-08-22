@@ -11,15 +11,15 @@ let app;
 const init_gui = gui.addFolder("Init options");
 const init = {
   level: "joint",
-  paths: "line sine circle triangle",
-  trials: 25,
+  paths: "angled-line sine",
+  trials: 50,
   randomized: false,
   amplification: "1 1.5",
   hand: 1,
   height: 1.8,
   shoulder: 0.05,
   scale: 0.4,
-  object: "controller",
+  object: "cube",
   hide_arm: false,
   start: () => start(),
 };

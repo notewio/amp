@@ -228,6 +228,7 @@ class App {
     this.paths.forEach(path => {
       path.position.copy(this.dom_hand().grip.position);
       path.position.y += this.approx_arm_length * 0.43;
+      path.position.z -= 0.05;
     });
   }
   set_rest_position() {
