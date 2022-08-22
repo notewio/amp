@@ -130,7 +130,10 @@ function start() {
   }, 125);
 
   live_gui.add(app, "reset")
-    .name("Reset position");
+    .name("Recalibrate IK");
+
+  live_gui.add(app, "set_rest_position")
+    .name("Set rest position");
 
   live_gui.add(app, "onSelectStart")
     .name("Start task");

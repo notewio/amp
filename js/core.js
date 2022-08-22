@@ -223,6 +223,11 @@ class App {
       path.position.y += this.approx_arm_length * 0.43;
     });
   }
+  set_rest_position() {
+    this.controllers.forEach(c => {
+      c.object.position.copy(c.grip.position);
+    });
+  }
 
   export() {
 

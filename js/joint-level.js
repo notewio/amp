@@ -97,7 +97,7 @@ class JointApp extends App {
     // Reset the amplified angles to be equal to real angles
     this.arm.forEach(joint => joint.angle = joint.rest_angle);
     this.kinematics();
-    this.amplified_arm.forEach((joint, i) => joint.angle = this.arm[i].angle);
+    this.set_rest_position();
 
     // Set path position
     this.paths.forEach(path => {
@@ -105,6 +105,9 @@ class JointApp extends App {
       path.position.z -= this.approx_arm_length * 0.43;
     });
 
+  }
+  set_rest_position() {
+    this.amplified_arm.forEach((joint, i) => joint.angle = this.arm[i].angle);
   }
 
 }
