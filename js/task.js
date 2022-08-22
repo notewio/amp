@@ -50,6 +50,8 @@ class Path extends THREE.Mesh {
     // this way, end pos checking only starts after you've moved some distance
     this.max_start_dist = -1;
 
+    this.raycaster = new THREE.Raycaster();
+
   }
 
   toLocalSpace(point, optionalTarget = new THREE.Vector3()) {
@@ -68,12 +70,27 @@ class Path extends THREE.Mesh {
   }
 
   update(point, start_callback, end_callback) {
+
+    // Point intersection, for display to user
+    if (this.visible) {
+      let dir = new THREE.Vector3(1, 1, 1).normalize();
+      this.raycaster.set(point, dir);
+      const intersects = this.raycaster.intersectObject(this, false);
+      if (intersects.length > 0) {
+        this.material.color.setHex(0x88ff88);
+      } else {
+        this.material.color.setHex(0xff8888);
+      }
+    }
+
+    // Update max_start_dist
     let translated = this.toLocalSpace(point);
     let dist_to_start = translated.distanceTo(this.start_pos);
     if (this.max_start_dist >= 0) {
       this.max_start_dist = Math.max(this.max_start_dist, dist_to_start);
     }
 
+    // Check for start/end point
     if (this.max_start_dist >= 0.3) { // TODO: not hardcoded
       let dist_to_end = this.toLocalSpace(point, translated).distanceTo(this.end_pos);
       if (dist_to_end < 0.04) {
@@ -87,6 +104,7 @@ class Path extends THREE.Mesh {
         start_callback();
       }
     }
+
   }
 }
 
