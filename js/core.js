@@ -4,6 +4,13 @@ import { CirclePath, TrianglePath, SinePath, LinePath } from "./task.js";
 import { XRControllerModelFactory } from "xrcontrollermodelfactory";
 
 
+const COLOR_NAMES = {
+  "aaaaaa": "gray",
+  "88ff88": "green",
+  "ff8888": "red",
+};
+
+
 function round(x, n = 4) {
   return Math.round(x * 10 ** n) / 10 ** n;
 }
@@ -189,6 +196,7 @@ class App {
       },
     )
 
+    this.log();
     this.renderer.render(this.scene, this.camera);
 
   }
@@ -203,17 +211,16 @@ class App {
   }
 
   log() {
-    if (this.logging) {
-      let now = performance.now();
-      this.log_data.at(-1)?.push([
-        now,
-        ...this.dom_hand().object.position.toArray(),
-        ...this.dom_hand().grip.position.toArray(),
-        ...(this.arm ? this.arm.map(j => j.angle) : []),
-      ]);
-    }
-    // NOTE: does this even need to be perfectly synchronous? how much data do we need?
-    setTimeout(this.log.bind(this), 1);
+    let now = performance.now();
+    this.log_data.at(-1)?.push([
+      now,
+      ...this.dom_hand().object.position.toArray(),
+      ...this.dom_hand().grip.position.toArray(),
+      this.current_path().visible ?
+        COLOR_NAMES[this.current_path().material.color.getHexString()]
+        : "invisible",
+      ...(this.arm ? this.arm.map(j => j.angle) : []),
+    ]);
   }
 
 
@@ -236,7 +243,7 @@ class App {
       let v = new THREE.Vector3();
       trial.forEach(t => {
         v.fromArray(t, 1);
-        while (t.length > (this.arm ? 9 : 7)) { t.pop() }
+        while (t.length > (this.arm ? 10 : 8)) { t.pop() }
         t.push(path.distanceTo(v));
       });
     });
@@ -253,7 +260,7 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
     content += this.log_data.map((_, i) => `Trial ${i
       } ${this.paths[i]?.constructor.name
       } ${this.paths[i]?.rotation.x
-      } Time (ms),Amplified hand x,Amplified hand y,Amplified hand z,Real hand x,Real hand y,Real hand z,${this.arm ? "Shoulder angle,Elbow angle," : ""
+      } Time (ms),Amplified hand x,Amplified hand y,Amplified hand z,Real hand x,Real hand y,Real hand z,Path color,${this.arm ? "Shoulder angle,Elbow angle," : ""
       }err`).join(",");
     for (let i = 0; i < Math.max(...this.log_data.map(x => x.length)); i++) {
       content += "\n";
@@ -261,7 +268,7 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
         // NOTE: in theory the only time a trial has no data is the very last one, so we don't have to worry about adding commas there.
         if (trial.length > 0) {
           if (i < trial.length) {
-            content += trial[i].map(x => round(x)).join(",") + ",";
+            content += trial[i].join(",") + ",";
           } else {
             content += ",".repeat(trial[0].length);
           }

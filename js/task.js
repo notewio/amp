@@ -71,8 +71,13 @@ class Path extends THREE.Mesh {
 
   update(point, start_callback, end_callback) {
 
-    // Point intersection, for display to user
-    if (this.visible) {
+    // Update max_start_dist
+    let translated = this.toLocalSpace(point);
+    let dist_to_start = translated.distanceTo(this.start_pos);
+    if (this.max_start_dist >= 0) {
+      this.max_start_dist = Math.max(this.max_start_dist, dist_to_start);
+
+      // Point intersection, for display to user
       let dir = new THREE.Vector3(1, 1, 1).normalize();
       this.raycaster.set(point, dir);
       const intersects = this.raycaster.intersectObject(this, false);
@@ -81,13 +86,6 @@ class Path extends THREE.Mesh {
       } else {
         this.material.color.setHex(0xff8888);
       }
-    }
-
-    // Update max_start_dist
-    let translated = this.toLocalSpace(point);
-    let dist_to_start = translated.distanceTo(this.start_pos);
-    if (this.max_start_dist >= 0) {
-      this.max_start_dist = Math.max(this.max_start_dist, dist_to_start);
     }
 
     // Check for start/end point
