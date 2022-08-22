@@ -129,6 +129,14 @@ class App {
         case "line":
           for (let i = 0; i < this.trials; i++) { this.paths.push(new LinePath(this.settings.scale)) }
           break;
+        case "angled-line":
+          for (let i = 0; i < this.trials; i++) {
+            let p = new LinePath(this.settings.scale);
+            p.rotation.x = -Math.PI / 4;
+            p.end.rotation.x = Math.PI / 4;
+            this.paths.push(p);
+          }
+          break;
         case "sine":
           for (let i = 0; i < this.trials; i++) { this.paths.push(new SinePath(this.settings.scale)) }
           break;
