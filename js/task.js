@@ -3,8 +3,8 @@ import * as THREE from "three";
 
 let util_quat = new THREE.Quaternion();
 
-let start_texture = new THREE.TextureLoader().load('../img/start.png');
-let end_texture = new THREE.TextureLoader().load('../img/end.png');
+let start_texture = new THREE.TextureLoader().load('img/start.png');
+let end_texture = new THREE.TextureLoader().load('img/end.png');
 
 
 class Path extends THREE.Mesh {
