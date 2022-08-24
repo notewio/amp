@@ -20,7 +20,11 @@ class JointApp extends App {
       new Joint(new THREE.Vector3(1, 0, 0), 0.1, 0, Math.PI / 2, Math.PI), // Elbow
     ];
     this.amplified_arm = this.arm.map(x => x.clone());
-    // this.arm.forEach(joint => joint.create_geometry(this.scene, 0.5));
+    this.arm.forEach(joint => joint.create_geometry(this.scene, 0.5));
+    this.arm.forEach(joint => {
+      joint.sphere.visible = false;
+      joint.cylinder.visible = false;
+    });
     this.amplified_arm.forEach(joint => joint.create_geometry(this.scene));
 
     this.shoulder = new THREE.Vector3(0, 1.5, 0.5);
@@ -33,7 +37,7 @@ class JointApp extends App {
         joint.sphere.visible = false;
         joint.cylinder.visible = false;
       });
-      this.amplified_arm.forEach(joint => {
+      this.amplified_arm?.forEach(joint => {
         joint.sphere.visible = false;
         joint.cylinder.visible = false;
       });
