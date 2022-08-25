@@ -139,4 +139,7 @@ function start() {
   live_gui.add(app, "export_json")
     .name("Export position log (JSON)");
 
+  live_gui.add(app, "export_paths")
+    .name("Export path points (CSV)");
+
 }

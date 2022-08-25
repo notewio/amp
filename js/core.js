@@ -150,8 +150,6 @@ class App {
       }
     });
 
-    if (this.settings.randomized) { shuffle(this.paths) }
-
     this.paths.forEach(p => {
       this.scene.add(p);
       p.visible = false;
@@ -309,6 +307,20 @@ Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
     link.href = url;
     link.setAttribute('download', "export.json");
     link.click();
+  }
+
+  export_paths() {
+    for (let i = 0; i < this.settings.paths.split(" ").length; i++) {
+      let path = this.paths[i * this.trials];
+      let points = path.curve.getSpacedPoints(1000);
+
+      let blob = new Blob([points.map(p => p.toArray().join(",")).join("\n")], { type: "text/csv;charset=utf-8;" });
+      let url = URL.createObjectURL(blob);
+      let link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${path.constructor.name}.csv`);
+      link.click();
+    }
   }
 
 
