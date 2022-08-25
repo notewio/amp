@@ -1,5 +1,4 @@
 import { EndpointApp } from "./endpoint-level.js";
-import { DefaultApp } from "./no-level.js";
 import { JointApp } from "./joint-level.js";
 import { GUI } from "lil-gui";
 
@@ -11,20 +10,18 @@ let app;
 const init_gui = gui.addFolder("Init options");
 const init = {
   level: "joint",
+  amplification: "1 1.5",
   paths: "angled-line sine",
   trials: 50,
-  //  randomized: false,
-  amplification: "1 1.5",
   hand: 1,
-  // height: 1.8,
-  shoulder: 0.07,
-  scale: 0.4,
   object: "cube",
   hide_arm: false,
+  shoulder: 0.07,
+  scale: 0.4,
   start: () => start(),
 };
 
-init_gui.add(init, "level", ["joint", "endpoint"]) //, "none"])
+init_gui.add(init, "level", ["joint", "endpoint"])
   .name("Amplification type")
   .onChange(v => {
     if (v === "endpoint" && init.amplification.match(/ /g)?.length < 2) {
@@ -42,9 +39,6 @@ init_gui.add(init, "paths")
 init_gui.add(init, "trials")
   .name("Trials per shape");
 
-// init_gui.add(init, "randomized")
-//   .name("Randomize order");
-
 init_gui.add(init, "hand", { Left: 0, Right: 1 })
   .name("Dominant hand");
 
@@ -53,9 +47,6 @@ init_gui.add(init, "object", ["controller", "cube"])
 
 init_gui.add(init, "hide_arm")
   .name("Hide arm during test");
-
-// init_gui.add(init, "height")
-//   .name("Height (m)");
 
 init_gui.add(init, "shoulder")
   .name("Shoulder offset");
@@ -74,8 +65,6 @@ function start() {
     app = new JointApp(init);
   } else if (init.level === "endpoint") {
     app = new EndpointApp(init);
-  } else {
-    app = new DefaultApp(init);
   }
 
 

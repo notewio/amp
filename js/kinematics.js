@@ -14,10 +14,10 @@ const TAU = Math.PI * 2;
     range: float       Range of motion, in radians
 */
 class Joint {
-  constructor(axis, length = 0, angle = 0, rest_angle = 0, range = TAU) {
+  constructor(axis, length = 0, rest_angle = 0, range = TAU) {
     this.axis = axis;
     this.length = length;
-    this.angle = angle;
+    this.angle = 0;
     this.rest_angle = rest_angle;
     this.range = range;
     this.origin = new THREE.Object3D();
@@ -53,7 +53,7 @@ class Joint {
   }
 
   clone() {
-    return new Joint(this.axis.clone(), this.length, this.angle, this.rest_angle);
+    return new Joint(this.axis.clone(), this.length, this.rest_angle, this.range);
   }
 }
 

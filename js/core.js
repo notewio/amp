@@ -95,11 +95,6 @@ class App {
 
     this.controllers = [0, 1].map(index => {
       let controller = this.renderer.xr.getController(index);
-      // controller.addEventListener("squeezestart", () => {
-      //   if (this.log_data.length == 0) {
-      //     this.reset();
-      //   }
-      // });
       this.scene.add(controller);
 
       let grip = this.renderer.xr.getControllerGrip(index);
@@ -124,7 +119,6 @@ class App {
         object: object,
       }
     });
-    // this.dom_hand().controller.addEventListener("selectstart", this.onSelectStart.bind(this));
 
   }
 
