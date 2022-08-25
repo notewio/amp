@@ -11,21 +11,6 @@ const COLOR_NAMES = {
 };
 
 
-function round(x, n = 4) {
-  return Math.round(x * 10 ** n) / 10 ** n;
-}
-function shuffle(array) {
-  let currentIndex = array.length, randomIndex;
-  while (currentIndex != 0) {
-    randomIndex = Math.floor(Math.random() * currentIndex);
-    currentIndex--;
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex], array[currentIndex]];
-  }
-  return array;
-}
-
-
 class App {
 
   constructor(settings) {
@@ -245,7 +230,7 @@ class App {
 
 Amplification level,${this.settings.level}
 Amplification amount,${this.settings.amplification}
-Path position,${this.paths[0].position.toArray().map(x => round(x)).join(",")}
+Path position,${this.paths[0].position.toArray().join(",")}
 
 `;
 
