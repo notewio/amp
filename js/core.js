@@ -297,7 +297,7 @@ Path position,${this.paths[0].position.toArray().join(",")}
   export_paths() {
     for (let i = 0; i < this.settings.paths.split(" ").length; i++) {
       let path = this.paths[i * this.trials];
-      let points = path.curve.getSpacedPoints(1000);
+      let points = path.curve.getSpacedPoints(1000).map(p => p.add(path.position));
 
       let blob = new Blob([points.map(p => p.toArray().join(",")).join("\n")], { type: "text/csv;charset=utf-8;" });
       let url = URL.createObjectURL(blob);
